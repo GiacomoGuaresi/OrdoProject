@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512.00098"
+   height="512.00098"
+   viewBox="0 0 135.46692 135.46693"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="OrdoPortal_icon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     width="512.001px"
+     inkscape:zoom="0.5"
+     inkscape:cx="414"
+     inkscape:cy="121"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-4"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Livello 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       d="m 135.4668,38.100131 v 76.199999 c 0,7.01146 -5.68855,12.7 -12.7,12.7 H 12.700128 c -7.0114605,0 -12.70000047559,-5.68854 -12.70000047559,-12.7 V 21.166798 C 1.2752441e-4,14.155339 5.6886675,8.4667975 12.700128,8.4667975 h 42.33333 L 71.966798,25.400131 H 122.7668 c 7.01145,0 12.7,5.688542 12.7,12.7 z"
+       id="path823"
+       style="fill:#333333;fill-opacity:1;stroke-width:0.264583" />
+    <path
+       fill="#17c0e9"
+       d="m 57.693899,46.244188 c -1.744863,4.273896 -4.474213,7.564271 -5.61708,12.439602 4.603981,-9.49744 15.615495,-24.48952 28.088359,-17.655449 6.860306,3.757882 9.86753,13.710778 10.433624,23.674914 1.110108,19.544668 -9.670003,43.221745 -23.675876,47.751135 -8.854894,2.86302 -15.563744,-4.37718 -18.4576,-10.03142 -8.936867,-17.459786 0.103342,-46.081223 9.228573,-56.178782 z m 10.032187,0.400923 c -12.67753,6.844806 -22.702531,41.695691 -12.43894,56.980829 2.618455,3.90031 9.850158,8.13431 14.445684,3.61114 -10.585678,1.59645 -14.602404,-8.918909 -15.248293,-17.254459 1.590479,7.480887 7.058232,16.512919 15.649817,12.840309 12.757693,-5.454517 19.077925,-32.834408 13.64258,-48.954217 1.133901,6.816198 0.788475,16.087099 -2.407718,20.86577 4.387725,-11.677048 0.40016,-35.670806 -13.64313,-28.089372 z"
+       id="path824-7"
+       style="fill:#ffffff;fill-opacity:1;stroke-width:0.0506345" />
+  </g>
+</svg>
