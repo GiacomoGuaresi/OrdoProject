@@ -26,6 +26,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/sortablejs": "^1.15.8",
     "@vitejs/plugin-react": "^4.7.0",
     "concurrently": "^9.2.0",
     "electron": "^37.3.1",
@@ -35,6 +36,12 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "electron-is-dev": "^3.0.1"
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.1",
+    "@mui/material": "^7.3.1",
+    "electron-is-dev": "^3.0.1",
+    "react-sortablejs": "^6.1.4",
+    "sortablejs": "^1.15.6"
   }
 }
