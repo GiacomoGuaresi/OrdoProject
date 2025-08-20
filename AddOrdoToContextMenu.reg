@@ -1,0 +1,31 @@
+Windows Registry Editor Version 5.00
+
+; ==========================================
+; File singoli o multipli
+; ==========================================
+[HKEY_CURRENT_USER\Software\Classes\*\shell\OrdoSortFile]
+@="Sort this with Ordo"
+"Icon"="C:\\Users\\guare\\source\\repos\\OrdoProject\\dist\\win-unpacked\\ordoproject.exe"
+
+[HKEY_CURRENT_USER\Software\Classes\*\shell\OrdoSortFile\command]
+@="\"C:\\Users\\guare\\source\\repos\\OrdoProject\\dist\\win-unpacked\\ordoproject.exe\" \"%1\""
+
+; ==========================================
+; Cartella cliccata (non sfondo)
+; ==========================================
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\OrdoSortFolder]
+@="Sort this folder with Ordo"
+"Icon"="C:\\Users\\guare\\source\\repos\\OrdoProject\\dist\\win-unpacked\\ordoproject.exe"
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\OrdoSortFolder\command]
+@="\"C:\\Users\\guare\\source\\repos\\OrdoProject\\dist\\win-unpacked\\ordoproject.exe\" \"%1\""
+
+; ==========================================
+; Sfondo cartella aperta (tutti i file nella cartella)
+; ==========================================
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\OrdoSortAll]
+@="Sort all with Ordo"
+"Icon"="C:\\Users\\guare\\source\\repos\\OrdoProject\\dist\\win-unpacked\\ordoproject.exe"
+
+[HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\OrdoSortAll\command]
+@="\"C:\\Users\\guare\\source\\repos\\OrdoProject\\dist\\win-unpacked\\ordoproject.exe\" \"%V\" --all"

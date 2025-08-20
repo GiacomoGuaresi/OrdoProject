@@ -1,0 +1,40 @@
+{
+  "name": "ordoproject",
+  "version": "1.0.0",
+  "main": "electron/main.js",
+  "build": {
+    "appId": "com.ordo.project",
+    "productName": "OrdoProject",
+    "files": [
+      "dist/**",
+      "electron/**",
+      "node_modules/**",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "start": "electron .",
+    "dev:all": "concurrently \"npm run dev\" \"npm run start\"",
+    "build": "vite build && electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.2.0",
+    "electron": "^37.3.1",
+    "electron-builder": "^26.0.12",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "electron-is-dev": "^3.0.1"
+  }
+}
