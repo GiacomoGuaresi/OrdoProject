@@ -7,8 +7,9 @@ import {
     Box,
     Paper,
     Grid,
+    InputAdornment, // Importa InputAdornment
 } from '@mui/material';
-import { Delete, Add, Save, ArrowUpward, ArrowDownward } from '@mui/icons-material';
+import { Delete, Add, Save, ArrowUpward, ArrowDownward, FolderOpen } from '@mui/icons-material'; // Importa l'icona FolderOpen
 
 const Rules = () => {
     const [rules, setRules] = useState([]);
@@ -24,6 +25,13 @@ const Rules = () => {
             i === index ? { ...rule, [field]: value } : rule
         );
         setRules(updated);
+    };
+
+    const handleFolderPicker = async (index) => {
+        const folderPath = await window.electronAPI.openFolderDialog();
+        if (folderPath) {
+          handleChange(index, 'destination', folderPath);
+        }
     };
 
     const addRule = () => {
@@ -69,6 +77,19 @@ const Rules = () => {
                             value={rule.destination}
                             size='small'
                             onChange={(e) => handleChange(index, 'destination', e.target.value)}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="seleziona cartella"
+                                            onClick={() => handleFolderPicker(index)}
+                                            edge="end"
+                                        >
+                                            <FolderOpen />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                     </Grid>
                     <Grid item size={2} sx={{ textAlign: { xs: 'right', sm: 'center' } }}>

@@ -37,7 +37,7 @@ function App() {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Container maxWidth="90vw" sx={{ mt: 4 }}>
         {value === 0 && <Rules />}
         {value === 1 && <History />}
       </Container>

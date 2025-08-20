@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Box,
@@ -9,28 +9,34 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
 } from '@mui/material';
-import { History as HistoryIcon } from '@mui/icons-material';
+
+// Funzione helper per estrarre la parte finale del percorso
+const getTruncatedPath = (path) => {
+  if (!path) return '';
+  const parts = path.split(/[/\\]/);
+  return parts.pop();
+};
 
 const History = () => {
-  // Dati di esempio per il mockup
-  const historyData = [
-    {
-      timestamp: '2025-08-20 10:00:00',
-      source: 'C:\\Users\\Utente\\Documenti\\report.pdf',
-      destination: 'D:\\Backup\\Documenti\\report.pdf',
-    },
-    {
-      timestamp: '2025-08-19 15:30:00',
-      source: 'C:\\Users\\Utente\\Immagini\\vacanza.jpg',
-      destination: 'E:\\Archivio\\Foto\\vacanza.jpg',
-    },
-    {
-      timestamp: '2025-08-19 12:45:00',
-      source: 'C:\\Users\\Utente\\Downloads\\file.zip',
-      destination: 'D:\\Backup\\Download\\file.zip',
-    },
-  ];
+  const [historyData, setHistoryData] = useState([]);
+
+  useEffect(() => {
+    window.electronAPI.getHistory().then((data) => {
+      setHistoryData(data || []);
+    });
+  }, []);
+
+  // Gestore per aprire la cartella in Esplora Risorse/Finder
+  const handleDestinationClick = (destinationPath) => {
+    if (window.electronAPI && window.electronAPI.showInFolder) {
+      window.electronAPI.showInFolder(destinationPath);
+    } else {
+      console.error('electronAPI.showInFolder non è disponibile.');
+      // Gestione per ambienti non-Electron, se necessario
+    }
+  };
 
   return (
     <Box>
@@ -60,8 +66,44 @@ const History = () => {
               {historyData.map((item, index) => (
                 <TableRow key={index}>
                   <TableCell>{item.timestamp}</TableCell>
-                  <TableCell>{item.source}</TableCell>
-                  <TableCell>{item.destination}</TableCell>
+                  {/* Cella Origine: troncamento automatico con CSS */}
+                  <Tooltip title={item.source} arrow>
+                    <TableCell>
+                      <Box
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          maxWidth: 300, // Puoi regolare questo valore
+                        }}
+                      >
+                        {item.source}
+                      </Box>
+                    </TableCell>
+                  </Tooltip>
+                  {/* Cella Destinazione: troncamento e link cliccabile */}
+                  <Tooltip title={item.destination} arrow>
+                    <TableCell
+                      onClick={() => handleDestinationClick(item.destination)}
+                      sx={{
+                        cursor: 'pointer',
+                        '&:hover': {
+                          textDecoration: 'underline',
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          maxWidth: 300, // Puoi regolare questo valore
+                        }}
+                      >
+                        {item.destination}
+                      </Box>
+                    </TableCell>
+                  </Tooltip>
                 </TableRow>
               ))}
             </TableBody>

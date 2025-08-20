@@ -1,5 +1,5 @@
 const path = require('path');
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog  } = require('electron');
 const fs = require('fs');
 const os = require('os');
 const isDev = require('electron-is-dev');
@@ -17,10 +17,59 @@ function readRules() {
   return [];
 }
 
+
+// Gestione degli eventi IPC per leggere e scrivere le regole
+
 ipcMain.handle('read-rules', () => readRules());
 ipcMain.handle('write-rules', (event, rules) => {
   fs.writeFileSync(rulesFile, JSON.stringify(rules, null, 2));
 });
+ipcMain.handle('open-folder-dialog', async (event) => {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['openDirectory'],
+  });
+
+  if (canceled) {
+    return null;
+  } else {
+    return filePaths[0];
+  }
+});
+ipcMain.handle('get-history', () => {
+  if (fs.existsSync(logFile)) {
+    const data = fs.readFileSync(logFile, 'utf-8');
+    const lines = data.split('\n').filter(line => line.trim() !== '');
+    
+    // Ignora la prima riga (intestazione)
+    lines.shift();
+
+    return lines.map(line => {
+      const [timestamp, source, destination] = line.split(',');
+      return { timestamp: timestamp.replace(/"/g, ''), source: source.replace(/"/g, ''), destination: destination.replace(/"/g, '') };
+    });
+  }
+  return [];
+});
+ipcMain.handle('show-in-folder', (event, path) => {
+  const folderPath = path.replace(/"/g, ''); // Rimuove eventuali virgolette
+  // Rimuove il file dal path 
+  const filePath = folderPath.split(/[/\\]/).slice(0, -1).join('\\');
+  if (fs.existsSync(filePath)) {
+    if (process.platform === 'win32') {
+      require('child_process').exec(`explorer "${filePath}"`);
+    }
+    else if (process.platform === 'darwin') {
+      require('child_process').exec(`open "${filePath}"`);
+    }
+    else {
+      require('child_process').exec(`xdg-open "${filePath}"`);
+    }
+  } else {
+    console.error(`La cartella ${filePath} non esiste.`);
+    dialog.showErrorBox('Errore', `La cartella ${filePath} non esiste.`);
+  }
+});
+
 
 function createWindow() {
   const win = new BrowserWindow({
