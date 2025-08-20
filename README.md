@@ -1,4 +1,5 @@
 # OrdoProject
+<img src="build/icon.png" width="300">
 
 **OrdoProject** is a lightweight utility application that helps you keep
 your files organized automatically.\
