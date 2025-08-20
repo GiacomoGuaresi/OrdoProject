@@ -28,4 +28,4 @@ Windows Registry Editor Version 5.00
 "Icon"="C:\\Users\\guare\\source\\repos\\OrdoProject\\dist\\win-unpacked\\ordoproject.exe"
 
 [HKEY_CURRENT_USER\Software\Classes\Directory\Background\shell\OrdoSortAll\command]
-@="\"C:\\Users\\guare\\source\\repos\\OrdoProject\\dist\\win-unpacked\\ordoproject.exe\" \"%V\" --all"
+@="\"C:\\Users\\guare\\source\\repos\\OrdoProject\\dist\\win-unpacked\\ordoproject.exe\" \"%V\" ALL"
