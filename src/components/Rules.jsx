@@ -9,7 +9,7 @@ import {
     Grid,
     InputAdornment, // Importa InputAdornment
 } from '@mui/material';
-import { Delete, Add, Save, ArrowUpward, ArrowDownward, FolderOpen } from '@mui/icons-material'; // Importa l'icona FolderOpen
+import { Delete, Add, Dehaze, FolderOpen } from '@mui/icons-material'; // Importa l'icona FolderOpen
 
 const Rules = () => {
     const [rules, setRules] = useState([]);
@@ -30,7 +30,7 @@ const Rules = () => {
     const handleFolderPicker = async (index) => {
         const folderPath = await window.electronAPI.openFolderDialog();
         if (folderPath) {
-          handleChange(index, 'destination', folderPath);
+            handleChange(index, 'destination', folderPath);
         }
     };
 
@@ -60,57 +60,69 @@ const Rules = () => {
     return (
         <Paper sx={{ p: 2, mb: 2 }} >
             {rules.map((rule, index) => (
-                <Grid key={index} sx={{ p: 1, mb: 1 }} container spacing={2} alignItems="center">
-                    <Grid item size={4}>
-                        <TextField
-                            fullWidth
-                            label="Pattern"
-                            value={rule.pattern}
-                            size='small'
-                            onChange={(e) => handleChange(index, 'pattern', e.target.value)}
-                        />
-                    </Grid>
-                    <Grid item size={6}>
-                        <TextField
-                            fullWidth
-                            label="Destinazione"
-                            value={rule.destination}
-                            size='small'
-                            onChange={(e) => handleChange(index, 'destination', e.target.value)}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="seleziona cartella"
-                                            onClick={() => handleFolderPicker(index)}
-                                            edge="end"
-                                        >
-                                            <FolderOpen />
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid>
-                    <Grid item size={2} sx={{ textAlign: { xs: 'right', sm: 'center' } }}>
+                <Box
+                    key={index}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        p: 1,
+                        mb: 1,
+                        gap: 1
+                    }}
+                >
+                    {/* Frecce su/giù */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                         <IconButton color="primary" onClick={() => alert("WIP")}>
-                            <ArrowUpward />
+                            <Dehaze />
                         </IconButton>
-                        <IconButton color="primary" onClick={() => alert("WIP")}>
-                            <ArrowDownward />
-                        </IconButton>
-                        <IconButton color="error" onClick={() => removeRule(index)}>
-                            <Delete />
-                        </IconButton>
-                    </Grid>
-                </Grid>
+                    </Box>
+
+                    {/* Pattern */}
+                    <TextField
+                        sx={{ flex: 4 }}
+                        fullWidth
+                        label="Pattern"
+                        value={rule.pattern}
+                        size='small'
+                        onChange={(e) => handleChange(index, 'pattern', e.target.value)}
+                    />
+
+                    {/* Destinazione */}
+                    <TextField
+                        sx={{ flex: 6 }}
+                        fullWidth
+                        label="Destinazione"
+                        value={rule.destination}
+                        size='small'
+                        onChange={(e) => handleChange(index, 'destination', e.target.value)}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="seleziona cartella"
+                                        onClick={() => handleFolderPicker(index)}
+                                        edge="end"
+                                        sx={{ color: '#fff' }}
+                                    >
+                                        <FolderOpen />
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+
+                    {/* Delete */}
+                    <IconButton color="error" onClick={() => removeRule(index)}>
+                        <Delete />
+                    </IconButton>
+                </Box>
             ))}
 
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center', gap: 2 }}>
-                <Button variant="contained" startIcon={<Add />} onClick={addRule}>
-                    Aggiungi Regola
-                </Button>
-                <Button variant="contained" color="success" startIcon={<Save />} onClick={saveRules}>
+            <Button sx={{ ml: 1 }} variant="buttonPrimary" startIcon={<Add />} onClick={addRule}>
+                Aggiungi Regola
+            </Button>
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'right', gap: 2 }}>
+                <Button variant="buttonPrimary" onClick={saveRules}>
                     Salva Regole
                 </Button>
             </Box>
