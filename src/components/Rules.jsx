@@ -6,10 +6,10 @@ import {
     IconButton,
     Box,
     Paper,
-    Grid,
-    InputAdornment, // Importa InputAdornment
+    InputAdornment,
 } from '@mui/material';
-import { Delete, Add, Dehaze, FolderOpen } from '@mui/icons-material'; // Importa l'icona FolderOpen
+import { Delete, Add, Dehaze, FolderOpen } from '@mui/icons-material';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const Rules = () => {
     const [rules, setRules] = useState([]);
@@ -51,72 +51,94 @@ const Rules = () => {
                 return;
             }
         }
-        // Simulazione di una chiamata ad electronAPI
-        // Sostituisci con await window.electronAPI.writeRules(rules) nella tua app Electron
         console.log('Regole salvate:', rules);
         alert('Regole salvate!');
     };
 
+    // Funzione chiamata al rilascio di un drag
+    const onDragEnd = (result) => {
+        if (!result.destination) return;
+        const updated = Array.from(rules);
+        const [moved] = updated.splice(result.source.index, 1);
+        updated.splice(result.destination.index, 0, moved);
+        setRules(updated);
+    };
+
     return (
-        <Paper sx={{ p: 2, mb: 2 }} >
-            {rules.map((rule, index) => (
-                <Box
-                    key={index}
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        p: 1,
-                        mb: 1,
-                        gap: 1
-                    }}
-                >
-                    {/* Frecce su/giù */}
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                        <IconButton color="primary" onClick={() => alert("WIP")}>
-                            <Dehaze />
-                        </IconButton>
-                    </Box>
+        <Paper sx={{ p: 2, mb: 2 }}>
+            <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="rulesList">
+                    {(provided) => (
+                        <div {...provided.droppableProps} ref={provided.innerRef}>
+                            {rules.map((rule, index) => (
+                                <Draggable key={index} draggableId={`rule-${index}`} index={index}>
+                                    {(provided, snapshot) => (
+                                        <Box
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                p: 1,
+                                                mb: 1,
+                                                gap: 1,
+                                                backgroundColor: 'transparent',
+                                            }}
+                                        >
+                                            {/* Handle per drag */}
+                                            <Box {...provided.dragHandleProps} sx={{ cursor: 'grab' }}>
+                                                <IconButton sx={{ color: 'text.secondary' }} size="small">
+                                                    <Dehaze />
+                                                </IconButton>
+                                            </Box>
 
-                    {/* Pattern */}
-                    <TextField
-                        sx={{ flex: 4 }}
-                        fullWidth
-                        label="Pattern"
-                        value={rule.pattern}
-                        size='small'
-                        onChange={(e) => handleChange(index, 'pattern', e.target.value)}
-                    />
+                                            {/* Pattern */}
+                                            <TextField
+                                                sx={{ flex: 4 }}
+                                                fullWidth
+                                                label="Pattern"
+                                                value={rule.pattern}
+                                                size="small"
+                                                onChange={(e) => handleChange(index, 'pattern', e.target.value)}
+                                            />
 
-                    {/* Destinazione */}
-                    <TextField
-                        sx={{ flex: 6 }}
-                        fullWidth
-                        label="Destinazione"
-                        value={rule.destination}
-                        size='small'
-                        onChange={(e) => handleChange(index, 'destination', e.target.value)}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="seleziona cartella"
-                                        onClick={() => handleFolderPicker(index)}
-                                        edge="end"
-                                        sx={{ color: '#fff' }}
-                                    >
-                                        <FolderOpen />
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                                            {/* Destinazione */}
+                                            <TextField
+                                                sx={{ flex: 6 }}
+                                                fullWidth
+                                                label="Destinazione"
+                                                value={rule.destination}
+                                                size="small"
+                                                onChange={(e) => handleChange(index, 'destination', e.target.value)}
+                                                InputProps={{
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <IconButton
+                                                                aria-label="seleziona cartella"
+                                                                onClick={() => handleFolderPicker(index)}
+                                                                edge="end"
+                                                                sx ={{ color: 'text.primary' }}
+                                                            >
+                                                                <FolderOpen />
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
 
-                    {/* Delete */}
-                    <IconButton color="error" onClick={() => removeRule(index)}>
-                        <Delete />
-                    </IconButton>
-                </Box>
-            ))}
+                                            {/* Delete */}
+                                            <IconButton sx={{ color:"text.primary" }} onClick={() => removeRule(index)}>
+                                                <Delete />
+                                            </IconButton>
+                                        </Box>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+            </DragDropContext>
 
             <Button sx={{ ml: 1 }} variant="buttonPrimary" startIcon={<Add />} onClick={addRule}>
                 Aggiungi Regola
