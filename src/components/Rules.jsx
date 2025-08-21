@@ -7,8 +7,14 @@ import {
     Box,
     Paper,
     InputAdornment,
+    List,
+    ListItem,
+    ListItemText,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
 } from '@mui/material';
-import { Delete, Add, Dehaze, FolderOpen } from '@mui/icons-material';
+import { Delete, Add, Dehaze, FolderOpen, ExpandMore } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const Rules = () => {
@@ -66,6 +72,59 @@ const Rules = () => {
 
     return (
         <Paper sx={{ p: 2, mb: 2 }}>
+
+            <Accordion sx={{ mb: 2 }}>
+                <AccordionSummary
+                    expandIcon={<ExpandMore />}
+                    aria-controls="file-rules-content"
+                    id="file-rules-header"
+                >
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                        Instructions
+                    </Typography>
+                </AccordionSummary>
+
+                <AccordionDetails>
+                    <Typography variant="body1" gutterBottom>
+                        Manage your file organization by setting up rules. Each rule consists of a{' '}
+                        <strong>pattern</strong> (a wildcard) and a <strong>destination</strong> folder.
+                        The application processes these rules from top to bottom, applying the first rule
+                        that matches a file. Files that don't match any rule will be ignored.
+                    </Typography>
+
+                    <Typography variant="body1" gutterBottom>
+                        You can rearrange the rules by dragging and dropping them using the grabber icon on
+                        the left. To delete a rule, simply click the trash can icon.
+                    </Typography>
+
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', marginTop: 2, marginBottom: 1 }}>
+                        Example Patterns:
+                    </Typography>
+
+                    <List dense>
+                        <ListItem disablePadding>
+                            <ListItemText
+                                primary="*.{png,jpg,jpeg}"
+                                secondary="Matches all files with the extensions .png, .jpg, or .jpeg."
+                            />
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemText
+                                primary="invoice_*.pdf"
+                                secondary="Matches all PDF files whose names start with 'invoice_'."
+                            />
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemText
+                                primary="*.zip"
+                                secondary="Matches all files with the .zip extension."
+                            />
+                        </ListItem>
+                    </List>
+                </AccordionDetails>
+            </Accordion>
+
+
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="rulesList">
                     {(provided) => (
@@ -102,11 +161,11 @@ const Rules = () => {
                                                 onChange={(e) => handleChange(index, 'pattern', e.target.value)}
                                             />
 
-                                            {/* Destinazione */}
+                                            {/* Destination */}
                                             <TextField
                                                 sx={{ flex: 6 }}
                                                 fullWidth
-                                                label="Destinazione"
+                                                label="Destination"
                                                 value={rule.destination}
                                                 size="small"
                                                 onChange={(e) => handleChange(index, 'destination', e.target.value)}
@@ -117,7 +176,7 @@ const Rules = () => {
                                                                 aria-label="seleziona cartella"
                                                                 onClick={() => handleFolderPicker(index)}
                                                                 edge="end"
-                                                                sx ={{ color: 'text.primary' }}
+                                                                sx={{ color: 'text.primary' }}
                                                             >
                                                                 <FolderOpen />
                                                             </IconButton>
@@ -127,7 +186,7 @@ const Rules = () => {
                                             />
 
                                             {/* Delete */}
-                                            <IconButton sx={{ color:"text.primary" }} onClick={() => removeRule(index)}>
+                                            <IconButton sx={{ color: "text.primary" }} onClick={() => removeRule(index)}>
                                                 <Delete />
                                             </IconButton>
                                         </Box>
@@ -140,12 +199,12 @@ const Rules = () => {
                 </Droppable>
             </DragDropContext>
 
-            <Button sx={{ ml: 1 }} variant="buttonPrimary" startIcon={<Add />} onClick={addRule}>
-                Aggiungi Regola
-            </Button>
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'right', gap: 2 }}>
+            <Box sx={{ ml: 1, mr: 1, mt: 3, display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+                <Button variant="buttonPrimary" startIcon={<Add />} onClick={addRule}>
+                    Add
+                </Button>
                 <Button variant="buttonPrimary" onClick={saveRules}>
-                    Salva Regole
+                    Save
                 </Button>
             </Box>
         </Paper>

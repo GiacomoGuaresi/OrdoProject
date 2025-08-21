@@ -10,13 +10,18 @@ import {
   TableHead,
   TableRow,
   Tooltip,
+  IconButton,
 } from '@mui/material';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { format } from 'date-fns';
 
-// Funzione helper per estrarre la parte finale del percorso
-const getTruncatedPath = (path) => {
-  if (!path) return '';
-  const parts = path.split(/[/\\]/);
-  return parts.pop();
+// Funzione helper per formattare timestamp
+const formatTimestamp = (timestamp) => {
+  try {
+    return format(new Date(timestamp), 'dd/MM/yyyy HH:mm:ss');
+  } catch {
+    return timestamp;
+  }
 };
 
 const History = () => {
@@ -28,13 +33,11 @@ const History = () => {
     });
   }, []);
 
-  // Gestore per aprire la cartella in Esplora Risorse/Finder
   const handleDestinationClick = (destinationPath) => {
-    if (window.electronAPI && window.electronAPI.showInFolder) {
+    if (window.electronAPI?.showInFolder) {
       window.electronAPI.showInFolder(destinationPath);
     } else {
-      console.error('electronAPI.showInFolder non è disponibile.');
-      // Gestione per ambienti non-Electron, se necessario
+      console.error('electronAPI.showInFolder non disponibile.');
     }
   };
 
@@ -52,12 +55,7 @@ const History = () => {
                 </TableCell>
                 <TableCell>
                   <Typography variant="subtitle1" fontWeight="bold">
-                    Origine
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    Destinazione
+                    Paths
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -65,45 +63,64 @@ const History = () => {
             <TableBody>
               {historyData.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell>{item.timestamp}</TableCell>
-                  {/* Cella Origine: troncamento automatico con CSS */}
-                  <Tooltip title={item.source} arrow>
-                    <TableCell>
-                      <Box
-                        sx={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          maxWidth: 300, // Puoi regolare questo valore
-                        }}
-                      >
-                        {item.source}
+                  {/* Timestamp */}
+                  <TableCell>{formatTimestamp(item.timestamp)}</TableCell>
+
+                  {/* From / To */}
+                  <TableCell>
+                    <Box display="flex" flexDirection="column" gap={0.5}>
+                      {/* From */}
+                      <Box display="flex" alignItems="center">
+                        <Typography variant="body2" fontWeight="bold" sx={{ marginRight: 1 }}>
+                          From:
+                        </Typography>
+                        <Tooltip title={item.source} arrow>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: 800,
+                            }}
+                          >
+                            {item.source}
+                          </Typography>
+                        </Tooltip>
                       </Box>
-                    </TableCell>
-                  </Tooltip>
-                  {/* Cella Destinazione: troncamento e link cliccabile */}
-                  <Tooltip title={item.destination} arrow>
-                    <TableCell
-                      onClick={() => handleDestinationClick(item.destination)}
-                      sx={{
-                        cursor: 'pointer',
-                        '&:hover': {
-                          textDecoration: 'underline',
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          maxWidth: 300, // Puoi regolare questo valore
-                        }}
-                      >
-                        {item.destination}
+
+                      {/* To */}
+                      <Box display="flex" alignItems="center">
+                        <Typography variant="body2" fontWeight="bold" sx={{ marginRight: 1 }}>
+                          To:
+                        </Typography>
+                        <Tooltip title={item.destination} arrow>
+                          <Box
+                            onClick={() => handleDestinationClick(item.destination)}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              cursor: 'pointer',
+                              borderBottom: '1px dashed #777777',
+                              paddingBottom: '2px', // distanza tra testo e linea
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: 800,
+                              '&:hover': {
+                                color: 'primary.main',
+                              },
+                            }}
+                          >
+                            <OpenInNewIcon fontSize="small" sx={{ mr: 0.5 }} />
+                            <Typography variant="body2" noWrap>
+                              {item.destination}
+                            </Typography>
+                          </Box>
+                        </Tooltip>
                       </Box>
-                    </TableCell>
-                  </Tooltip>
+                    </Box>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -38,8 +38,8 @@ function App() {
               textColor="inherit"
               indicatorColor="secondary"
             >
-              <Tab label="Regole" />
-              <Tab label="Cronologia" />
+              <Tab label="Rule" />
+              <Tab label="History" />
             </Tabs>
           </Toolbar>
         </AppBar>

@@ -33,7 +33,7 @@ const theme = createTheme({
     borderRadius: 12,
   },
   components: {
-        MuiCssBaseline: {
+    MuiCssBaseline: {
       styleOverrides: {
         html: {
           // Scrollbar per browser Webkit (Chrome, Edge, Safari)
@@ -145,6 +145,53 @@ const theme = createTheme({
           '&:last-child': {
             paddingRight: 24,
           },
+        },
+      },
+    },
+
+    MuiAccordion: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#323232',
+          border: '1px solid #3f3f3f',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          color: '#ffffff', // testo chiaro
+          borderRadius: 12, // arrotondamenti morbidi
+          transition: 'all 0.3s ease', // transizione fluida
+          '&:before': {
+            display: 'none', // rimuove la linea superiore standard
+          },
+          '&.Mui-expanded': {
+            backgroundColor: '#333333', // colore leggermente più chiaro quando espanso
+          },
+        },
+      },
+    },
+
+    MuiAccordionSummary: {
+      styleOverrides: {
+        root: {
+          padding: '0 16px',
+          minHeight: 56,
+          '& .MuiAccordionSummary-content': {
+            margin: '12px 0',
+          },
+        },
+        expandIconWrapper: {
+          color: '#FFD86C', // icona a tema Windows 11 gold accent
+          transition: 'transform 0.3s ease',
+          '&.Mui-expanded': {
+            transform: 'rotate(180deg)',
+          },
+        },
+      },
+    },
+
+    MuiAccordionDetails: {
+      styleOverrides: {
+        root: {
+          padding: '16px',
+          borderTop: '1px solid #3f3f3f',
         },
       },
     },
