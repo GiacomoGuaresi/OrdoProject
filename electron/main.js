@@ -10,11 +10,11 @@ const rulesFile = path.join(appDataPath, 'rules.json');
 const logFile = path.join(appDataPath, 'move_log.csv');
 
 function readRules() {
-  if (!fs.existsSync(appDataPath)) fs.mkdirSync(appDataPath, { recursive: true });
-  if (fs.existsSync(rulesFile)) {
+  if (!fs.existsSync(appDataPath))     fs.mkdirSync(appDataPath, { recursive: true });
+    if (fs.existsSync(rulesFile)) {
     return JSON.parse(fs.readFileSync(rulesFile));
   }
-  return [];
+return [];
 }
 
 
@@ -84,10 +84,13 @@ function createWindow() {
     autoHideMenuBar: true,
   });
 
-  if (isDev) {
+  if (!app.isPackaged) {
+    console.log("Loading dev server...");
     win.loadURL('http://localhost:5173');
   } else {
-    win.loadFile(path.join(__dirname, '../dist/index.html'));
+    const indexPath = path.join(__dirname, "../dist/index.html");
+    console.log("Loading file:", indexPath);
+    win.loadFile(indexPath);
   }
 }
 

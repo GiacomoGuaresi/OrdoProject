@@ -14,6 +14,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme'; // importiamo il tema
 import Rules from './components/Rules';
 import History from './components/History';
+import logo from "../build/icon.png";
 
 function App() {
   const [value, setValue] = useState(0);
@@ -28,7 +29,7 @@ function App() {
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
           <Toolbar>
-            <img src="../build/icon.png" alt="Ordo Logo" style={{ height: 40, marginRight: 10 }} />
+            <img src={logo} alt="Ordo Logo" style={{ height: 40, marginRight: 10 }} />
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Ordo Project
             </Typography>
