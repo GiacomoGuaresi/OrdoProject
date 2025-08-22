@@ -1,20 +1,71 @@
 const path = require('path');
 const { app, BrowserWindow, ipcMain, dialog  } = require('electron');
-const fs = require('fs');
+const fs = require("fs-extra");
 const os = require('os');
-const isDev = require('electron-is-dev');
 const minimatch = require('minimatch').minimatch;
 
 const appDataPath = path.join(os.homedir(), 'AppData', 'Roaming', 'OrdoProject');
 const rulesFile = path.join(appDataPath, 'rules.json');
 const logFile = path.join(appDataPath, 'move_log.csv');
 
-function readRules() {
-  if (!fs.existsSync(appDataPath))     fs.mkdirSync(appDataPath, { recursive: true });
-    if (fs.existsSync(rulesFile)) {
-    return JSON.parse(fs.readFileSync(rulesFile));
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
-return [];
+}
+
+function readRules() {
+  if (!fs.existsSync(appDataPath)) {
+    fs.mkdirSync(appDataPath, { recursive: true });
+  }
+
+  if (fs.existsSync(rulesFile)) {
+    return JSON.parse(fs.readFileSync(rulesFile, "utf8"));
+  }
+
+  // Template base
+  const defaultRules = [
+    {
+      "pattern": "*.{txt,doc,docx,pdf,odt,rtf}",
+      "destination": path.join(os.homedir(), "Documents")
+    },
+    {
+      "pattern": "*.{xls,xlsx,csv,ods}",
+      "destination": path.join(os.homedir(), "Documents", "Spreadsheets")
+    },
+    {
+      "pattern": "*.{ppt,pptx,odp}",
+      "destination": path.join(os.homedir(), "Documents", "Presentations")
+    },
+    {
+      "pattern": "*.{png,jpg,jpeg,gif,bmp,webp,svg,ico,icns}",
+      "destination": path.join(os.homedir(), "Pictures")
+    },
+    {
+      "pattern": "*.{mp3,wav,flac,aac,ogg}",
+      "destination": path.join(os.homedir(), "Music")
+    },
+    {
+      "pattern": "*.{mp4,avi,mkv,wmv,mov}",
+      "destination": path.join(os.homedir(), "Videos")
+    },
+    {
+      "pattern": "*.{zip,rar,7z,tar,gz}",
+      "destination": path.join(os.homedir(), "Downloads", "Archives")
+    },
+    {
+      "pattern": "*.{exe,msi}",
+      "destination": path.join(os.homedir(), "Downloads", "Installers")
+    }
+  ];
+
+  // 🔑 Creo tutte le cartelle necessarie
+  defaultRules.forEach(rule => ensureDir(rule.destination));
+
+  // Salvo il file rules.json
+  fs.writeFileSync(rulesFile, JSON.stringify(defaultRules, null, 2), "utf8");
+  
+  return defaultRules;
 }
 
 
