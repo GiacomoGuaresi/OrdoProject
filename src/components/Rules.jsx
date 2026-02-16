@@ -57,6 +57,7 @@ const Rules = () => {
                 return;
             }
         }
+        await window.electronAPI.writeRules(rules);
         console.log('Regole salvate:', rules);
         alert('Regole salvate!');
     };

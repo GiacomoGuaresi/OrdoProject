@@ -4,7 +4,7 @@ const fs = require("fs-extra");
 const os = require('os');
 const minimatch = require('minimatch').minimatch;
 
-const appDataPath = path.join(os.homedir(), 'AppData', 'Roaming', 'OrdoProject');
+const appDataPath = app.getPath('userData');
 const rulesFile = path.join(appDataPath, 'rules.json');
 const logFile = path.join(appDataPath, 'move_log.csv');
 
@@ -101,23 +101,23 @@ ipcMain.handle('get-history', () => {
   }
   return [];
 });
-ipcMain.handle('show-in-folder', (event, path) => {
-  const folderPath = path.replace(/"/g, ''); // Rimuove eventuali virgolette
+ipcMain.handle('show-in-folder', (event, filePath) => {
+  const folderPath = filePath.replace(/"/g, ''); // Rimuove eventuali virgolette
   // Rimuove il file dal path 
-  const filePath = folderPath.split(/[/\\]/).slice(0, -1).join('\\');
-  if (fs.existsSync(filePath)) {
+  const dirPath = path.dirname(folderPath);
+  if (fs.existsSync(dirPath)) {
     if (process.platform === 'win32') {
-      require('child_process').exec(`explorer "${filePath}"`);
+      require('child_process').exec(`explorer "${dirPath}"`);
     }
     else if (process.platform === 'darwin') {
-      require('child_process').exec(`open "${filePath}"`);
+      require('child_process').exec(`open "${dirPath}"`);
     }
     else {
-      require('child_process').exec(`xdg-open "${filePath}"`);
+      require('child_process').exec(`xdg-open "${dirPath}"`);
     }
   } else {
-    console.error(`La cartella ${filePath} non esiste.`);
-    dialog.showErrorBox('Errore', `La cartella ${filePath} non esiste.`);
+    console.error(`La cartella ${dirPath} non esiste.`);
+    dialog.showErrorBox('Errore', `La cartella ${dirPath} non esiste.`);
   }
 });
 
