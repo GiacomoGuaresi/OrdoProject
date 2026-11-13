@@ -19,7 +19,8 @@
 - **React + TypeScript**
 - **shadcn/ui** (componenti Radix copiati nel repo) + **Tailwind CSS**
 - Tema chiaro/scuro gestito via classi Tailwind, sincronizzato con il sistema.
-- Tipi condivisi Rust → TS generati automaticamente (strumento da definire: `specta`/`ts-rs`).
+- Tipi condivisi Rust → TS generati con **ts-rs** (feature `ts-rs` di `ordo-core`, output in `app/src/bindings`, rigenerati con `pnpm bindings`; la CI verifica che siano aggiornati).
+- i18n del frontend con **i18next**; lint con **oxlint**; drag & drop con **dnd-kit**.
 
 ## Persistenza
 Directory dati per-utente standard del sistema (es. via crate `directories`):

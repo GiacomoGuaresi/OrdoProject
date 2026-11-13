@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint --deny-warnings",
     "typecheck": "tsc -b --noEmit",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "preview": "vite preview",
     "tauri": "tauri",
     "bindings": "rm -rf src/bindings && cd .. && cargo test -q -p ordo-core --features ts-rs export_bindings"
@@ -25,7 +25,6 @@
     "cn": "^0.5.2",
     "i18next": "^27.1.1",
     "lucide-react": "^1.72.0",
-    "next-themes": "^0.4.6",
     "radix-ui": "^1.8.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
