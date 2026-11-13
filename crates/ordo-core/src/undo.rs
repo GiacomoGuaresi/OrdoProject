@@ -14,7 +14,12 @@ use crate::sorter::FileError;
 
 /// Result of undoing one move.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "kind", rename_all = "snake_case")]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
+#[serde(
+    tag = "kind",
+    rename_all = "snake_case",
+    rename_all_fields = "camelCase"
+)]
 pub enum UndoOutcome {
     /// The file is back. `restored_to` is where it was put (it differs from the
     /// original path when the user chose "keep both").
@@ -37,6 +42,7 @@ pub enum UndoOutcome {
 
 /// What happened to a file that had been overwritten (and trashed).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum TrashOutcome {
     Restored,
@@ -48,6 +54,7 @@ pub enum TrashOutcome {
 
 /// Summary of a batch undo.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct UndoReport {
     pub batch_id: i64,

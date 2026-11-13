@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 /// Where a sort was started from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "snake_case")]
 pub enum Origin {
     Cli,
@@ -16,6 +17,7 @@ pub enum Origin {
 
 /// State of a single entry of a batch.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "snake_case")]
 pub enum MoveStatus {
     /// The file was moved.
@@ -36,6 +38,7 @@ pub enum MoveStatus {
 
 /// Machine-readable reason of a failure, localized by the front-ends.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "snake_case")]
 pub enum ErrorCode {
     /// The source file does not exist (anymore).
@@ -74,6 +77,7 @@ impl ErrorCode {
 
 /// A failure on a single file.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 pub struct OpError {
     pub code: ErrorCode,
     /// Technical detail (OS error message, path, …).
@@ -108,6 +112,7 @@ impl std::error::Error for OpError {}
 
 /// How to resolve a name conflict.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "kebab-case")]
 pub enum Resolution {
     /// Replace the existing file (which goes to the trash).
@@ -120,6 +125,7 @@ pub enum Resolution {
 
 /// A name conflict, presented to the user.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct Conflict {
     /// The file that would be moved.
@@ -130,8 +136,73 @@ pub struct Conflict {
     pub is_undo: bool,
 }
 
+/// Basic metadata of a file, shown in the conflict dialog.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
+#[serde(rename_all = "camelCase")]
+pub struct FileMeta {
+    pub path: PathBuf,
+    pub name: String,
+    pub size: u64,
+    pub modified: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+impl FileMeta {
+    pub fn read(path: &std::path::Path) -> Self {
+        let meta = std::fs::metadata(path).ok();
+        Self {
+            path: path.to_path_buf(),
+            name: path
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_default(),
+            size: meta.as_ref().map(|m| m.len()).unwrap_or(0),
+            modified: meta
+                .and_then(|m| m.modified().ok())
+                .map(chrono::DateTime::<chrono::Utc>::from),
+        }
+    }
+}
+
+/// A conflict with the information needed to present it to the user.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
+#[serde(rename_all = "camelCase")]
+pub struct ConflictDetails {
+    pub conflict: Conflict,
+    pub existing: FileMeta,
+    pub incoming: FileMeta,
+    /// Both files have the same content.
+    pub identical: bool,
+}
+
+impl ConflictDetails {
+    pub fn gather(conflict: &Conflict) -> Self {
+        Self {
+            existing: FileMeta::read(&conflict.existing),
+            incoming: FileMeta::read(&conflict.incoming),
+            identical: crate::fsops::files_identical(&conflict.existing, &conflict.incoming)
+                .unwrap_or(false),
+            conflict: conflict.clone(),
+        }
+    }
+}
+
+/// A conflict sent to a graphical front-end, which answers by `id`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
+#[serde(rename_all = "camelCase")]
+pub struct ConflictRequest {
+    pub id: u64,
+    /// How many conflicts were already shown in the same operation.
+    pub index: u32,
+    #[serde(flatten)]
+    pub details: ConflictDetails,
+}
+
 /// The user's answer to a conflict.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct Decision {
     pub resolution: Resolution,
@@ -186,6 +257,24 @@ impl<'a> StickyResolver<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn conflict_details() {
+        let tmp = tempfile::tempdir().unwrap();
+        let a = tmp.path().join("a.txt");
+        let b = tmp.path().join("b.txt");
+        std::fs::write(&a, "same").unwrap();
+        std::fs::write(&b, "same").unwrap();
+        let d = ConflictDetails::gather(&Conflict {
+            incoming: a.clone(),
+            existing: b,
+            is_undo: false,
+        });
+        assert!(d.identical);
+        assert_eq!(d.incoming.name, "a.txt");
+        assert_eq!(d.incoming.size, 4);
+        assert!(d.incoming.modified.is_some());
+    }
 
     #[test]
     fn error_code_roundtrip() {

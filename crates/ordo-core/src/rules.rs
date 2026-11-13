@@ -17,6 +17,7 @@ pub const RULES_FILE_VERSION: u32 = 1;
 
 /// Kind of pattern used to match the file name.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "lowercase")]
 pub enum PatternKind {
     /// Shell-style glob, e.g. `*.{jpg,png}`.
@@ -27,6 +28,7 @@ pub enum PatternKind {
 
 /// A sorting rule.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct Rule {
     pub id: Uuid,
@@ -119,6 +121,7 @@ impl Matcher {
 
 /// The ordered list of rules, as stored in `rules.json`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 pub struct RuleSet {
     pub version: u32,
     pub rules: Vec<Rule>,

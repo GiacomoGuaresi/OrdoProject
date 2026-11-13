@@ -104,6 +104,7 @@ pub struct NewEntry {
 
 /// A recorded entry of a batch.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct Entry {
     pub id: i64,
@@ -145,6 +146,7 @@ impl Entry {
 
 /// Number of entries per status.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct StatusCounts {
     pub done: u32,
@@ -188,6 +190,7 @@ impl StatusCounts {
 
 /// A batch with its entry counts.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct BatchSummary {
     pub id: i64,
@@ -198,6 +201,7 @@ pub struct BatchSummary {
 
 /// A batch with all its entries.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct BatchDetail {
     #[serde(flatten)]

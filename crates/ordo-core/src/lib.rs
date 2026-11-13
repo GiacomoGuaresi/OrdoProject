@@ -16,8 +16,8 @@ pub use error::{Error, Result};
 pub use history::{BatchDetail, BatchSummary, Entry, History, StatusCounts};
 pub use lang::Lang;
 pub use model::{
-    Conflict, ConflictResolver, Decision, ErrorCode, FixedResolver, MoveStatus, OpError, Origin,
-    Resolution,
+    Conflict, ConflictDetails, ConflictRequest, ConflictResolver, Decision, ErrorCode, FileMeta,
+    FixedResolver, MoveStatus, OpError, Origin, Resolution,
 };
 pub use paths::AppPaths;
 pub use rules::{PatternKind, Rule, RuleSet};

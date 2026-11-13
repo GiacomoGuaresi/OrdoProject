@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 /// A language supported by Ordo's user-facing texts.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "lowercase")]
 pub enum Lang {
     #[default]

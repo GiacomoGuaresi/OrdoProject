@@ -15,6 +15,7 @@ use crate::scan::{self, ScanEntry};
 
 /// Summary of a sort run.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct SortReport {
     /// The recorded batch; `None` when there was nothing to sort.
@@ -32,6 +33,7 @@ impl SortReport {
 
 /// A failure on a specific file.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase")]
 pub struct FileError {
     pub path: PathBuf,

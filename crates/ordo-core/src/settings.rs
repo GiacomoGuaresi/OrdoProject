@@ -16,6 +16,7 @@ pub const DEFAULT_RETENTION_DAYS: u32 = 90;
 
 /// Color theme of the app.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "lowercase")]
 pub enum Theme {
     #[default]
@@ -26,6 +27,7 @@ pub enum Theme {
 
 /// User settings.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "camelCase", default)]
 pub struct Settings {
     pub version: u32,

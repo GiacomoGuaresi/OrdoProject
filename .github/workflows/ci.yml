@@ -60,3 +60,11 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
+      - name: Check TypeScript bindings are up to date
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          rm -rf app/src/bindings
+          cargo test -q -p ordo-core --features ts-rs export_bindings
+          git diff --exit-code -- app/src/bindings
+          test -z "$(git status --porcelain -- app/src/bindings)"
