@@ -125,10 +125,10 @@ pub fn copy_verify_remove(src: &Path, dst: &Path) -> Result<(), OpError> {
         }
         Err(e) => return rollback(io_err(e)),
     }
-    if let Ok(modified) = fs::metadata(src).and_then(|m| m.modified()) {
-        if let Ok(f) = fs::File::options().write(true).open(dst) {
-            let _ = f.set_modified(modified);
-        }
+    if let Ok(modified) = fs::metadata(src).and_then(|m| m.modified())
+        && let Ok(f) = fs::File::options().write(true).open(dst)
+    {
+        let _ = f.set_modified(modified);
     }
     if let Err(e) = fs::remove_file(src) {
         return rollback(io_err(e));

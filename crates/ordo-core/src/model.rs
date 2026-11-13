@@ -243,10 +243,11 @@ mod tests {
 
         inner.1.apply_to_all = true;
         inner.0 = 0;
-        let mut s = StickyResolver::new(&mut inner);
-        assert_eq!(s.resolve(&c), Resolution::Skip);
-        assert_eq!(s.resolve(&c), Resolution::Skip);
-        drop(s);
+        {
+            let mut s = StickyResolver::new(&mut inner);
+            assert_eq!(s.resolve(&c), Resolution::Skip);
+            assert_eq!(s.resolve(&c), Resolution::Skip);
+        }
         assert_eq!(inner.0, 1);
     }
 }
