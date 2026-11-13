@@ -22,3 +22,6 @@ Desktop.ini
 .idea/
 
 .env
+
+# Tauri external binaries (built by scripts/prepare-cli.mjs)
+/app/src-tauri/binaries/

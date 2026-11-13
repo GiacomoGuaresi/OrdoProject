@@ -4,6 +4,9 @@
 //! - `conflicts`: conflict questions during a sort started from the file manager.
 //! - `summary`: toast-like summary shown after such a sort, with "Undo".
 
+use std::sync::Mutex;
+use std::time::{Duration, Instant};
+
 use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
 pub const MAIN: &str = "main";
@@ -106,5 +109,44 @@ pub fn show_summary(app: &AppHandle, batch: Option<i64>) -> tauri::Result<()> {
         builder = builder.position(x, y);
     }
     builder.build()?;
+    app.state::<SummaryTimer>()
+        .set(Some(Duration::from_secs(SUMMARY_SECONDS)));
+    let app = app.clone();
+    std::thread::spawn(move || summary_watchdog(&app));
     Ok(())
+}
+
+/// Seconds before the summary closes by itself.
+pub const SUMMARY_SECONDS: u64 = 10;
+
+/// When the summary window must close. Driven from Rust so that it works even
+/// when the web view throttles its timers (e.g. hidden or locked screen).
+#[derive(Default)]
+pub struct SummaryTimer(Mutex<Option<Instant>>);
+
+impl SummaryTimer {
+    /// `Some(d)`: close after `d`; `None`: keep open until told otherwise.
+    pub fn set(&self, after: Option<Duration>) {
+        *self.0.lock().expect("poisoned") = after.map(|d| Instant::now() + d);
+    }
+
+    fn expired(&self) -> bool {
+        self.0
+            .lock()
+            .expect("poisoned")
+            .is_some_and(|deadline| Instant::now() >= deadline)
+    }
+}
+
+fn summary_watchdog(app: &AppHandle) {
+    loop {
+        std::thread::sleep(Duration::from_millis(250));
+        let Some(window) = app.get_webview_window(SUMMARY) else {
+            return;
+        };
+        if app.state::<SummaryTimer>().expired() {
+            let _ = window.close();
+            return;
+        }
+    }
 }

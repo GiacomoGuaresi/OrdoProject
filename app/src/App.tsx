@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ConflictDialog } from '@/features/conflicts/ConflictDialog'
 import { HistoryPage } from '@/features/history/HistoryPage'
+import { OnboardingDialog } from '@/features/onboarding/OnboardingDialog'
 import { RulesPage } from '@/features/rules/RulesPage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
 import { UpdateBanner } from '@/features/updates/UpdateBanner'
@@ -76,6 +77,7 @@ export default function App({ initialPage = 'rules', initialBatch = null }: Prop
         </div>
       </div>
       <ConflictDialog />
+      <OnboardingDialog />
       <Toaster position="bottom-right" richColors closeButton />
     </TooltipProvider>
   )

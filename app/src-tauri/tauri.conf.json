@@ -1,6 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Ordo",
+  "mainBinaryName": "ordo-app",
   "version": "../package.json",
   "identifier": "io.github.giacomoguaresi.ordo",
   "build": {
@@ -17,13 +18,44 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "app",
+      "dmg",
+      "nsis",
+      "appimage",
+      "deb"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "category": "Utility",
+    "shortDescription": "Sort files into folders with simple rules",
+    "longDescription": "Ordo moves files into folders according to an ordered list of rules (glob or regex on the file name). Sort from the file manager context menu or with the ordo command, and undo any run from the history.",
+    "publisher": "Giacomo Guaresi",
+    "copyright": "© 2026 Giacomo Guaresi — MIT License",
+    "homepage": "https://github.com/GiacomoGuaresi/OrdoProject",
+    "license": "MIT",
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": [
+          "English",
+          "Italian"
+        ],
+        "displayLanguageSelector": false
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "11.0"
+    },
+    "linux": {
+      "deb": {
+        "section": "utils"
+      }
+    }
   }
 }

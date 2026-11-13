@@ -2,6 +2,15 @@
 
 Ogni milestone produce qualcosa di utilizzabile e rilasciabile.
 
+## Stato (aggiornato al 2026-11-13)
+| Milestone | Stato |
+|---|---|
+| M0 — Preparazione repository | ✅ completata |
+| M1 — `ordo-core` + CLI | ✅ completata |
+| M2 — App Tauri | ✅ completata |
+| M3 — Integrazione menu contestuale | ✅ completata (verifica manuale su Windows/Linux da fare) |
+| M4 — Distribuzione | 🟡 configurata; primo rilascio da eseguire con un tag `v*` |
+
 ## M0 — Preparazione repository
 - Tag `v1-electron` sullo stato attuale di `master`.
 - Branch `v2`; rimozione codice Electron.

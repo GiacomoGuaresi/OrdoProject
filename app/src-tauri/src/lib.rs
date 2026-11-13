@@ -125,6 +125,7 @@ pub fn run() {
                 instance,
                 primary_lock: Mutex::new(Some(lock)),
             });
+            app.manage(windows::SummaryTimer::default());
             watch_inbox(app.handle().clone());
             Ok(())
         })
@@ -159,6 +160,7 @@ pub fn run() {
             commands::resolve_conflict,
             commands::open_main,
             commands::reveal_path,
+            commands::summary_keep_open,
             commands::file_thumbnail,
             commands::preview_file,
             commands::integration_status,

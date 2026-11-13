@@ -32,6 +32,12 @@ export function SummaryWindow({ batchId }: { batchId: number | null }) {
   const [remaining, setRemaining] = useState(AUTO_CLOSE_SECONDS)
   const hovered = useRef(false)
 
+  // The window is closed by the backend when the time is up; these calls
+  // only move that deadline.
+  const keepOpen = (seconds: number | null) => {
+    if (inTauri()) void api.summaryKeepOpen(seconds)
+  }
+
   useEffect(() => {
     if (batchId === null || !inTauri()) return
     api
@@ -40,21 +46,18 @@ export function SummaryWindow({ batchId }: { batchId: number | null }) {
       .catch((e) => setPhase({ kind: 'error', message: errorMessage(e) }))
   }, [batchId])
 
-  // Countdown, paused while hovered, loading or undoing.
+  // Displayed countdown, paused while hovered, loading or undoing.
   const counting = phase.kind !== 'undoing' && phase.kind !== 'loading'
   useEffect(() => {
     if (!counting) return
     const timer = setInterval(() => {
-      if (!hovered.current) setRemaining((r) => r - 1)
+      if (!hovered.current) setRemaining((r) => Math.max(0, r - 1))
     }, 1000)
     return () => clearInterval(timer)
   }, [counting])
 
-  useEffect(() => {
-    if (remaining <= 0) closeWindow()
-  }, [remaining])
-
   const undo = async (batch: BatchDetail) => {
+    keepOpen(null)
     setPhase({ kind: 'undoing', batch })
     try {
       const report = await api.undoBatch(batch.id)
@@ -63,6 +66,7 @@ export function SummaryWindow({ batchId }: { batchId: number | null }) {
       setPhase({ kind: 'error', message: errorMessage(e) })
     }
     setRemaining(5)
+    keepOpen(5)
   }
 
   const details = async () => {
@@ -109,8 +113,14 @@ export function SummaryWindow({ batchId }: { batchId: number | null }) {
   return (
     <div
       className="bg-background text-foreground flex h-screen flex-col justify-between gap-3 p-4 select-none"
-      onMouseEnter={() => (hovered.current = true)}
-      onMouseLeave={() => (hovered.current = false)}
+      onMouseEnter={() => {
+        hovered.current = true
+        keepOpen(null)
+      }}
+      onMouseLeave={() => {
+        hovered.current = false
+        if (phase.kind !== 'undoing') keepOpen(Math.max(remaining, 3))
+      }}
     >
       <div className="flex items-start gap-3">
         {icon}

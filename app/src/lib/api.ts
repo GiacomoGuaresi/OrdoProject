@@ -39,6 +39,8 @@ export const api = {
   revealPath: (path: string) => invoke<void>('reveal_path', { path }),
   fileThumbnail: (path: string) => invoke<string | null>('file_thumbnail', { path }),
   previewFile: (path: string) => invoke<void>('preview_file', { path }),
+  /** Postpones (seconds) or suspends (null) the automatic close of the summary window. */
+  summaryKeepOpen: (seconds: number | null) => invoke<void>('summary_keep_open', { seconds }),
   pendingConflicts: () => invoke<ConflictRequest[]>('pending_conflicts'),
   openMain: (batch: number | null) => invoke<void>('open_main', { batch }),
 

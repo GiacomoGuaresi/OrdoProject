@@ -200,6 +200,14 @@ pub fn reveal_path(path: PathBuf) -> CmdResult<()> {
     tauri_plugin_opener::reveal_item_in_dir(&target).map_err(err)
 }
 
+/// Postpones (seconds) or suspends (`None`) the automatic close of the summary.
+#[tauri::command]
+pub fn summary_keep_open(app: AppHandle, seconds: Option<u64>) {
+    use tauri::Manager;
+    app.state::<windows::SummaryTimer>()
+        .set(seconds.map(std::time::Duration::from_secs));
+}
+
 /// Largest image turned into a thumbnail.
 const MAX_THUMBNAIL_BYTES: u64 = 15 * 1024 * 1024;
 
