@@ -150,6 +150,18 @@ const MESSAGES: &[(&str, &str, &str)] = &[
     ),
     ("rules.off", "off", "off"),
     // generic
+    // integration
+    ("integration.installed", "installed", "installata"),
+    (
+        "integration.not_installed",
+        "not installed",
+        "non installata",
+    ),
+    (
+        "integration.unavailable",
+        "not available",
+        "non disponibile",
+    ),
     ("error", "Error", "Errore"),
 ];
 

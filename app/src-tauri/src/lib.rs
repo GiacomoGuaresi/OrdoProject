@@ -159,6 +159,12 @@ pub fn run() {
             commands::resolve_conflict,
             commands::open_main,
             commands::reveal_path,
+            commands::integration_status,
+            commands::integration_install,
+            commands::integration_uninstall,
+            commands::command_status,
+            commands::command_install,
+            commands::command_uninstall,
         ])
         .build(tauri::generate_context!())
         .expect("error while building Ordo");

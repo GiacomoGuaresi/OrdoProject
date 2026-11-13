@@ -10,6 +10,9 @@ use ordo_core::{
 };
 use tauri::{AppHandle, State, WebviewWindow};
 
+use ordo_core::integration::command::{self, CommandStatus};
+use ordo_core::integration::{ContextMenu, IntegrationStatus};
+
 use crate::conflicts::{ConflictBroker, DialogResolver};
 use crate::instance::InstanceDir;
 use crate::sortmode::SortQueue;
@@ -195,6 +198,59 @@ pub fn reveal_path(path: PathBuf) -> CmdResult<()> {
             .ok_or_else(|| format!("{} does not exist", path.display()))?
     };
     tauri_plugin_opener::reveal_item_in_dir(&target).map_err(err)
+}
+
+/// Executable that the file manager should start: the AppImage itself when
+/// running from one (the binary lives in a temporary mount), otherwise this
+/// process' executable.
+fn app_executable() -> CmdResult<PathBuf> {
+    if let Some(appimage) = std::env::var_os("APPIMAGE") {
+        return Ok(PathBuf::from(appimage));
+    }
+    std::env::current_exe().map_err(err)
+}
+
+fn context_menu(state: &AppState) -> CmdResult<ContextMenu> {
+    let lang = state.settings()?.effective_lang();
+    ContextMenu::new(app_executable()?, lang).map_err(err)
+}
+
+#[tauri::command]
+pub fn integration_status(state: State<'_, AppState>) -> CmdResult<IntegrationStatus> {
+    Ok(context_menu(&state)?.status())
+}
+
+#[tauri::command]
+pub async fn integration_install(app: AppHandle) -> CmdResult<IntegrationStatus> {
+    run_blocking(app, |_, state| context_menu(state)?.install().map_err(err)).await
+}
+
+#[tauri::command]
+pub async fn integration_uninstall(app: AppHandle) -> CmdResult<IntegrationStatus> {
+    run_blocking(app, |_, state| {
+        context_menu(state)?.uninstall().map_err(err)
+    })
+    .await
+}
+
+#[tauri::command]
+pub fn command_status() -> CmdResult<CommandStatus> {
+    command::status().map_err(err)
+}
+
+/// Installs the `ordo` command (may show the system's administrator prompt).
+#[tauri::command]
+pub async fn command_install(app: AppHandle) -> CmdResult<CommandStatus> {
+    run_blocking(app, |_, _| {
+        let exe = std::env::current_exe().map_err(err)?;
+        command::install(&command::cli_next_to(&exe)).map_err(err)
+    })
+    .await
+}
+
+#[tauri::command]
+pub async fn command_uninstall(app: AppHandle) -> CmdResult<CommandStatus> {
+    run_blocking(app, |_, _| command::uninstall().map_err(err)).await
 }
 
 /// Runs blocking core work (which may wait for conflict answers) off the

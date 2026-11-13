@@ -1,5 +1,5 @@
 export type Route =
-  | { view: 'main'; batch: number | null }
+  | { view: 'main'; page: 'rules' | 'history' | 'settings'; batch: number | null }
   | { view: 'conflicts' }
   | { view: 'summary'; batch: number | null }
 
@@ -13,8 +13,10 @@ export function parseRoute(hash: string): Route {
     case 'summary':
       return { view: 'summary', batch: id }
     case 'history':
-      return { view: 'main', batch: id }
+      return { view: 'main', page: 'history', batch: id }
+    case 'settings':
+      return { view: 'main', page: 'settings', batch: null }
     default:
-      return { view: 'main', batch: null }
+      return { view: 'main', page: 'rules', batch: null }
   }
 }

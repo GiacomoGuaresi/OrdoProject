@@ -24,7 +24,7 @@ createRoot(document.getElementById('root')!).render(
         </>
       )}
       {route.view === 'main' && (
-        <App initialPage={route.batch !== null ? 'history' : 'rules'} initialBatch={route.batch} />
+        <App initialPage={route.page} initialBatch={route.batch} />
       )}
     </SettingsProvider>
   </StrictMode>,

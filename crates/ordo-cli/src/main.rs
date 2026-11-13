@@ -112,6 +112,23 @@ enum Command {
     /// Manage the sorting rules.
     #[command(subcommand)]
     Rules(RulesCommand),
+    /// Install or remove the "Sort with Ordo" context-menu entry.
+    #[command(subcommand)]
+    Integration(IntegrationCommand),
+}
+
+#[derive(Debug, Subcommand)]
+enum IntegrationCommand {
+    /// Add the entry to the file manager's context menu.
+    Install {
+        /// Path of the Ordo desktop app (default: next to this command).
+        #[arg(long)]
+        app: Option<PathBuf>,
+    },
+    /// Remove the entry from the context menu.
+    Uninstall,
+    /// Show whether the entry is installed.
+    Status,
 }
 
 #[derive(Debug, Subcommand)]
@@ -238,6 +255,7 @@ fn run(cli: Cli) -> Result<u8> {
         } => cmd_undo(&ctx, batch, move_id, &conflict),
         Command::History { batch, limit } => cmd_history(&ctx, batch, limit),
         Command::Rules(cmd) => cmd_rules(&ctx, cmd),
+        Command::Integration(cmd) => cmd_integration(&ctx, cmd),
     }
 }
 
@@ -590,6 +608,59 @@ fn cmd_rules(ctx: &Ctx, cmd: RulesCommand) -> Result<u8> {
         ctx.print_json(&serde_json::json!({ "message": msg, "rules": set.rules }));
     } else {
         println!("{msg}");
+    }
+    Ok(exit::OK)
+}
+
+/// Names of the desktop app executable, looked up next to the CLI.
+const APP_NAMES: &[&str] = if cfg!(windows) {
+    &["ordo-app.exe", "Ordo.exe"]
+} else {
+    &["ordo-app", "Ordo"]
+};
+
+fn find_app(explicit: Option<PathBuf>) -> Result<PathBuf> {
+    if let Some(app) = explicit {
+        return Ok(std::path::absolute(&app)?);
+    }
+    let exe = std::env::current_exe().context("cannot locate the ordo executable")?;
+    let exe = std::fs::canonicalize(&exe).unwrap_or(exe);
+    APP_NAMES
+        .iter()
+        .map(|name| exe.with_file_name(name))
+        .find(|p| p.is_file())
+        .with_context(|| {
+            format!(
+                "the Ordo app was not found next to {}; pass it with --app",
+                exe.display()
+            )
+        })
+}
+
+fn cmd_integration(ctx: &Ctx, cmd: IntegrationCommand) -> Result<u8> {
+    use ordo_core::integration::ContextMenu;
+    let tr = ctx.tr;
+    let status = match cmd {
+        IntegrationCommand::Install { app } => {
+            ContextMenu::new(find_app(app)?, ctx.lang())?.install()?
+        }
+        IntegrationCommand::Uninstall => {
+            // The app path is not needed to remove the entries.
+            ContextMenu::new(PathBuf::new(), ctx.lang())?.uninstall()?
+        }
+        IntegrationCommand::Status => ContextMenu::new(PathBuf::new(), ctx.lang())?.status(),
+    };
+    if ctx.json {
+        ctx.print_json(&status);
+        return Ok(exit::OK);
+    }
+    for item in &status.items {
+        let state = match (item.available, item.installed) {
+            (_, true) => tr.t("integration.installed", &[]),
+            (true, false) => tr.t("integration.not_installed", &[]),
+            (false, false) => tr.t("integration.unavailable", &[]),
+        };
+        println!("{:<24} {:<16} {}", item.name, state, item.location);
     }
     Ok(exit::OK)
 }

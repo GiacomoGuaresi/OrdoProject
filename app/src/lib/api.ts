@@ -3,6 +3,8 @@ import type { UnlistenFn } from '@tauri-apps/api/event'
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 
 import type { BatchDetail } from '@/bindings/BatchDetail'
+import type { CommandStatus } from '@/bindings/CommandStatus'
+import type { IntegrationStatus } from '@/bindings/IntegrationStatus'
 import type { BatchSummary } from '@/bindings/BatchSummary'
 import type { ConflictRequest } from '@/bindings/ConflictRequest'
 import type { Decision } from '@/bindings/Decision'
@@ -37,6 +39,13 @@ export const api = {
   revealPath: (path: string) => invoke<void>('reveal_path', { path }),
   pendingConflicts: () => invoke<ConflictRequest[]>('pending_conflicts'),
   openMain: (batch: number | null) => invoke<void>('open_main', { batch }),
+
+  integrationStatus: () => invoke<IntegrationStatus>('integration_status'),
+  integrationInstall: () => invoke<IntegrationStatus>('integration_install'),
+  integrationUninstall: () => invoke<IntegrationStatus>('integration_uninstall'),
+  commandStatus: () => invoke<CommandStatus>('command_status'),
+  commandInstall: () => invoke<CommandStatus>('command_install'),
+  commandUninstall: () => invoke<CommandStatus>('command_uninstall'),
 }
 
 export function onOpenBatch(handler: (batch: number) => void): Promise<UnlistenFn> {

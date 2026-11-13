@@ -28,10 +28,17 @@ pub fn show_main(app: &AppHandle, batch: Option<i64>) -> tauri::Result<()> {
         }
         return Ok(());
     }
-    let route = match batch {
+    let mut route = match batch {
         Some(id) => format!("index.html#/history/{id}"),
         None => "index.html".to_string(),
     };
+    // Development aid: open a given page, e.g. ORDO_DEV_ROUTE=settings.
+    if cfg!(debug_assertions)
+        && batch.is_none()
+        && let Ok(dev) = std::env::var("ORDO_DEV_ROUTE")
+    {
+        route = format!("index.html#/{dev}");
+    }
     let w = WebviewWindowBuilder::new(app, MAIN, WebviewUrl::App(route.into()))
         .title("Ordo")
         .inner_size(960.0, 640.0)

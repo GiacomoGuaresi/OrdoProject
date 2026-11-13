@@ -276,3 +276,15 @@ fn nothing_to_sort() {
         .success()
         .stdout(predicate::str::contains("Nothing to sort"));
 }
+
+#[test]
+fn integration_status_and_missing_app() {
+    let env = Env::new();
+    let status = env.json(&["integration", "status"]);
+    assert!(status["items"].is_array());
+    env.ordo()
+        .args(["integration", "install", "--app", "does-not-exist"])
+        .assert()
+        .code(1)
+        .stderr(predicate::str::contains("does not exist"));
+}

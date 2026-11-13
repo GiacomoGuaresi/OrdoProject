@@ -17,6 +17,8 @@ import { api, errorMessage, inTauri } from '@/lib/api'
 import { LANGUAGES } from '@/lib/i18n'
 import { useSettings } from '@/lib/settings'
 
+import { IntegrationSection } from './IntegrationSection'
+
 export const REPO_URL = 'https://github.com/GiacomoGuaresi/OrdoProject'
 
 const RETENTION_OPTIONS = [7, 30, 90, 180, 365]
@@ -103,6 +105,12 @@ export function SettingsPage() {
             </SelectContent>
           </Select>
         </Row>
+      </Section>
+
+      <Separator />
+
+      <Section title={t('settings.integration')}>
+        <IntegrationSection />
       </Section>
 
       <Separator />
