@@ -34,6 +34,7 @@ pub fn cli_next_to(app_exe: &Path) -> PathBuf {
     app_exe.with_file_name(CLI_NAME)
 }
 
+#[cfg(unix)]
 fn path_dirs() -> Vec<PathBuf> {
     std::env::var_os("PATH")
         .map(|p| std::env::split_paths(&p).collect())
