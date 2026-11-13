@@ -50,7 +50,15 @@
 | `ordo integration install\|uninstall\|status` | Installa/rimuove l'integrazione con il menu contestuale |
 
 Opzioni globali: `--json` (output strutturato dove sensato), `--lang`, `--help`, `--version`.
-Exit code distinti per: successo, successo parziale (alcuni errori), errore.
+Exit code: `0` successo · `1` errore · `2` uso errato (argomenti) · `3` successo parziale (alcuni errori).
+
+Dettagli implementativi della prima versione:
+- `ordo history <batch-id>` mostra il dettaglio di un batch (id dei singoli spostamenti per `undo --move`).
+- `ordo rules add --name N (--glob P | --regex P) --dest DIR [--case-sensitive] [--disabled] [--position N]`;
+  le regole si indicano per posizione (1-based) o id; disponibili anche `rules import|export <file>`.
+- Prompt TTY sui conflitti: `o` sovrascrivi · `k` mantieni entrambi · `s` salta (maiuscola = applica a tutti).
+- Variabile `ORDO_HOME`: se impostata, regole/impostazioni/cronologia stanno in quella cartella (test, uso portable).
+- I link simbolici non vengono ordinati (come i file nascosti).
 
 ## Feedback all'utente (menu contestuale)
 - Al termine: **notifica nativa di sistema** con riepilogo (es. "12 file ordinati, 3 ignorati").

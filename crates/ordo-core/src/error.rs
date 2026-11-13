@@ -5,14 +5,14 @@ use std::path::PathBuf;
 /// Errors returned by `ordo-core`.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("I/O error on {path}: {source}")]
+    #[error("I/O error on {path}")]
     Io {
         path: PathBuf,
         #[source]
         source: std::io::Error,
     },
 
-    #[error("invalid JSON in {path}: {source}")]
+    #[error("invalid JSON in {path}")]
     Json {
         path: PathBuf,
         #[source]
