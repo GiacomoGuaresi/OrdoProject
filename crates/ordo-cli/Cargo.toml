@@ -1,0 +1,18 @@
+[package]
+name = "ordo-cli"
+description = "Ordo command-line interface"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "ordo"
+path = "src/main.rs"
+
+[dependencies]
+ordo-core.workspace = true
+anyhow.workspace = true
+clap = { version = "4", features = ["derive"] }

@@ -1,101 +1,62 @@
-# OrdoProject
-<img src="build/icon.png" width="300">
+# Ordo
 
-**OrdoProject** is a lightweight utility application that helps you keep
-your files organized automatically.\
-With a simple and intuitive interface, you can define rules based on
-**wildcards** and map them to **target directories**.\
-When applied to a file, folder, or even your entire desktop, OrdoProject
-automatically sorts and moves files according to your rules.
+<img src="assets/icon.png" width="160" alt="Ordo icon">
 
-------------------------------------------------------------------------
+**Ordo** sorts files into folders using simple rules, straight from your file
+manager's context menu or from the terminal. It runs on macOS, Windows and Linux.
 
-## ✨ Features
+> **Status:** v2 is being rewritten from scratch with Tauri 2 and Rust on the
+> `v2` branch. The old Electron version is tagged
+> [`v1-electron`](https://github.com/GiacomoGuaresi/OrdoProject/tree/v1-electron).
 
--   🗂 **Rule-based sorting** -- Define wildcard rules (e.g. `*.jpg`,
-    `report_*.pdf`) and associate them with target directories.\
--   📂 **Batch organization** -- Apply rules to single files, selected
-    folders, or your desktop.\
--   🔄 **Automatic moving** -- Files matching the rules are instantly
-    moved into their corresponding directories.\
--   📜 **Logging** -- Keep track of all file movements with a detailed
-    log.\
--   🎨 **Modern UI** -- Built with **Electron**, **React**, and
-    **Material Design** for a clean and user-friendly experience.
+## How it works
 
-------------------------------------------------------------------------
+- You keep **one ordered list of rules**. Each rule matches the file name with a
+  **glob** (`*.{jpg,png}`) or a **regex** (`^invoice_\d{4}\.pdf$`) and moves the
+  file to a fixed folder. The first rule that matches wins.
+- Sorting runs only when you ask: right-click a file, a selection or a folder,
+  or use the `ordo` command.
+- Every run is saved in the **history**, and you can **undo** a whole run or a
+  single move.
+- When a file with the same name already exists, Ordo asks you whether to
+  overwrite it, keep both or skip. Overwritten files go to the system trash.
 
-## 🚀 Installation
+## Repository layout
 
-1.  Clone the repository:
-
-    ``` bash
-    git clone https://github.com/yourusername/OrdoProject.git
-    ```
-
-2.  Navigate to the project folder:
-
-    ``` bash
-    cd OrdoProject
-    ```
-
-3.  Install dependencies:
-
-    ``` bash
-    npm install
-    ```
-
-4.  Start the application in development mode:
-
-    ``` bash
-    npm start
-    ```
-
-To build the production version:
-
-``` bash
-npm run build
+```
+Cargo.toml          Cargo workspace
+crates/ordo-core    library: rules, matching, moves, history, undo
+crates/ordo-cli     the `ordo` command-line tool
+app/                desktop app (React + TypeScript, pnpm)
+app/src-tauri       Tauri crate
+docs/               design docs (in Italian)
 ```
 
-------------------------------------------------------------------------
+## Development
 
-## 📖 Usage
+Requirements: Rust (stable), Node.js 20+, pnpm, and the
+[Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
 
-1.  Open **OrdoProject**.\
-2.  Create one or more rules by specifying:
-    -   **Pattern (wildcard)** → e.g. `*.png`, `music_*.mp3`\
-    -   **Target directory** → where the matched files should go\
-3.  Select a file, a folder, or your desktop as the source.\
-4.  Apply rules -- OrdoProject will automatically move the files.\
-5.  Check the **log** to review the performed operations.
+```bash
+# Rust core and CLI
+cargo test --workspace
+cargo run -p ordo-cli -- --help
 
-------------------------------------------------------------------------
+# Desktop app
+cd app
+pnpm install
+pnpm tauri dev
+```
 
-## 🛠 Tech Stack
+Checks run in CI:
 
--   **Electron** -- Desktop app framework\
--   **React** -- Frontend library\
--   **Material UI** -- UI components\
--   **Node.js** -- Backend logic
+```bash
+cargo fmt --all --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
+cd app && pnpm lint && pnpm typecheck && pnpm test
+```
 
-------------------------------------------------------------------------
+## License
 
-## 📌 Roadmap / Ideas
-
--   Add **regex-based rules** in addition to wildcards.\
--   Enable **scheduled automatic sorting** (background service).\
--   Provide **cloud sync** for rules across devices.\
--   Allow **undo** operations for recent file movements.
-
-------------------------------------------------------------------------
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!\
-Feel free to open a pull request or file an issue in the repository.
-
-------------------------------------------------------------------------
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
+[MIT](LICENSE)

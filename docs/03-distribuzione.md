@@ -13,7 +13,7 @@
 ## CI/CD — GitHub Actions
 - **Su ogni PR / push**: matrice `macos-latest`, `windows-latest`, `ubuntu-latest`
   - Rust: `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`
-  - Frontend: lint (eslint), typecheck (`tsc`), test
+  - Frontend: lint (oxlint), typecheck (`tsc`), test (Vitest)
   - Build di verifica dell'app
 - **Su tag `v*`**: build degli installer per le tre piattaforme (`tauri-action`)
   e creazione di una **GitHub Release in bozza** con tutti gli artefatti.
