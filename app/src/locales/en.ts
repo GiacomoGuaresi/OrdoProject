@@ -154,6 +154,15 @@ const en = {
     applyToAll: 'Apply to all remaining conflicts',
     reveal: 'Show in folder',
   },
+  summary: {
+    sorted_one: '{{count}} file sorted',
+    sorted_other: '{{count}} files sorted',
+    nothing: 'Nothing to sort',
+    failed: 'Sorting failed',
+    undo: 'Undo',
+    details: 'Details',
+    undone: 'Sorting undone',
+  },
   update: {
     available: 'Ordo {{version}} is available.',
     download: 'Download',

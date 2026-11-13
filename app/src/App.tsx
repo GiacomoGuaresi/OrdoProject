@@ -1,5 +1,5 @@
 import { History, ListChecks, Settings as SettingsIcon, type LucideIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Toaster } from '@/components/ui/sonner'
@@ -9,6 +9,7 @@ import { HistoryPage } from '@/features/history/HistoryPage'
 import { RulesPage } from '@/features/rules/RulesPage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
 import { UpdateBanner } from '@/features/updates/UpdateBanner'
+import { inTauri, onOpenBatch } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
 export type Page = 'rules' | 'history' | 'settings'
@@ -27,6 +28,19 @@ interface Props {
 export default function App({ initialPage = 'rules', initialBatch = null }: Props) {
   const { t } = useTranslation()
   const [page, setPage] = useState<Page>(initialPage)
+  const [batch, setBatch] = useState<number | null>(initialBatch)
+
+  // "Details" from a sort summary while this window is already open.
+  useEffect(() => {
+    if (!inTauri()) return
+    const un = onOpenBatch((id) => {
+      setBatch(id)
+      setPage('history')
+    })
+    return () => {
+      void un.then((f) => f())
+    }
+  }, [])
 
   return (
     <TooltipProvider>
@@ -56,7 +70,7 @@ export default function App({ initialPage = 'rules', initialBatch = null }: Prop
           </nav>
           <main className="min-h-0 flex-1 overflow-y-auto p-6">
             {page === 'rules' && <RulesPage />}
-            {page === 'history' && <HistoryPage key={initialBatch ?? -1} initialBatch={initialBatch} />}
+            {page === 'history' && <HistoryPage key={batch ?? -1} initialBatch={batch} />}
             {page === 'settings' && <SettingsPage />}
           </main>
         </div>

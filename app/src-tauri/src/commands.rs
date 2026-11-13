@@ -1,14 +1,19 @@
 //! Tauri commands exposed to the web UI.
 
+use std::fs::File;
 use std::path::PathBuf;
+use std::sync::Mutex;
 
 use ordo_core::{
-    AppPaths, BatchDetail, BatchSummary, Decision, History, Lang, Rule, RuleSet, Settings,
-    UndoOutcome, UndoReport,
+    AppPaths, BatchDetail, BatchSummary, ConflictRequest, Decision, History, Lang, Rule, RuleSet,
+    Settings, UndoOutcome, UndoReport,
 };
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, State, WebviewWindow};
 
 use crate::conflicts::{ConflictBroker, DialogResolver};
+use crate::instance::InstanceDir;
+use crate::sortmode::SortQueue;
+use crate::windows;
 
 /// Error returned to the UI: a human-readable message.
 type CmdResult<T> = Result<T, String>;
@@ -21,6 +26,10 @@ fn err(e: impl std::fmt::Display) -> String {
 pub struct AppState {
     pub paths: AppPaths,
     pub broker: ConflictBroker,
+    pub sort_queue: SortQueue,
+    pub instance: InstanceDir,
+    /// Lock held while this process is the primary instance.
+    pub primary_lock: Mutex<Option<File>>,
 }
 
 impl AppState {
@@ -113,24 +122,60 @@ pub fn clear_history(state: State<'_, AppState>) -> CmdResult<()> {
     state.history()?.clear().map_err(err)
 }
 
+/// Resolver for an undo started from `window`: conflicts are asked in the
+/// same window, except for the small summary window, which delegates them to
+/// the conflict window.
+fn undo_resolver<'a>(app: &AppHandle, state: &'a AppState, window: &str) -> DialogResolver<'a> {
+    if window == windows::SUMMARY {
+        DialogResolver::new(app.clone(), &state.broker, windows::CONFLICTS).with_prepare(|app| {
+            if let Err(e) = windows::show_conflicts(app) {
+                log::error!("cannot open the conflict window: {e}");
+            }
+        })
+    } else {
+        DialogResolver::new(app.clone(), &state.broker, window)
+    }
+}
+
+/// Undoes a batch.
 #[tauri::command]
-pub async fn undo_batch(app: AppHandle, id: i64) -> CmdResult<UndoReport> {
+pub async fn undo_batch(app: AppHandle, window: WebviewWindow, id: i64) -> CmdResult<UndoReport> {
+    let label = window.label().to_string();
     run_blocking(app, move |app, state| {
         let history = state.history()?;
-        let mut resolver = DialogResolver::new(app.clone(), &state.broker);
-        ordo_core::undo_batch(&history, id, &mut resolver).map_err(err)
+        let mut resolver = undo_resolver(app, state, &label);
+        let report = ordo_core::undo_batch(&history, id, &mut resolver).map_err(err);
+        windows::close(app, windows::CONFLICTS);
+        report
     })
     .await
 }
 
+/// Undoes a single move.
 #[tauri::command]
-pub async fn undo_move(app: AppHandle, id: i64) -> CmdResult<UndoOutcome> {
+pub async fn undo_move(app: AppHandle, window: WebviewWindow, id: i64) -> CmdResult<UndoOutcome> {
+    let label = window.label().to_string();
     run_blocking(app, move |app, state| {
         let history = state.history()?;
-        let mut resolver = DialogResolver::new(app.clone(), &state.broker);
+        let mut resolver = undo_resolver(app, state, &label);
         ordo_core::undo_move(&history, id, &mut resolver).map_err(err)
     })
     .await
+}
+
+/// Conflicts addressed to the calling window that are still unanswered.
+#[tauri::command]
+pub fn pending_conflicts(
+    state: State<'_, AppState>,
+    window: WebviewWindow,
+) -> Vec<ConflictRequest> {
+    state.broker.pending_for(window.label())
+}
+
+/// Opens (or focuses) the main window, optionally on a batch of the history.
+#[tauri::command]
+pub fn open_main(app: AppHandle, batch: Option<i64>) -> CmdResult<()> {
+    windows::show_main(&app, batch).map_err(err)
 }
 
 #[tauri::command]

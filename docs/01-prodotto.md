@@ -61,9 +61,10 @@ Dettagli implementativi della prima versione:
 - I link simbolici non vengono ordinati (come i file nascosti).
 
 ## Feedback all'utente (menu contestuale)
-- Al termine: **notifica nativa di sistema** con riepilogo (es. "12 file ordinati, 3 ignorati").
-- Azione **"Annulla"** nella notifica, dove la piattaforma lo supporta.
-- Click sulla notifica → apre l'app sulla cronologia (batch appena eseguito).
+- Al termine: **riepilogo** (es. "12 file ordinati, 3 ignorati") in una finestra in stile notifica
+  (toast in basso a destra) — vedi `02-stack.md` per il motivo (azioni non supportate dalle notifiche native).
+- Azione **"Annulla"** nel riepilogo.
+- **"Dettagli"** → apre l'app sulla cronologia (batch appena eseguito).
 - Errori: riportati nella notifica e dettagliati nella cronologia.
 
 ## App grafica — sezioni e funzioni

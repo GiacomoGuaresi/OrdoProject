@@ -1,5 +1,5 @@
 import { CopyCheck, FolderSearch } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { ConflictRequest } from '@/bindings/ConflictRequest'
@@ -7,17 +7,12 @@ import type { FileMeta } from '@/bindings/FileMeta'
 import type { Resolution } from '@/bindings/Resolution'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { api, inTauri, onConflict } from '@/lib/api'
+import { api } from '@/lib/api'
 import { baseName, dirName, formatDateTime, formatSize } from '@/lib/format'
+
+import { useConflictQueue } from './useConflictQueue'
 
 function FileCard({ title, file }: { title: string; file: FileMeta }) {
   const { t, i18n } = useTranslation()
@@ -51,25 +46,25 @@ interface ViewProps {
   onAnswer: (resolution: Resolution, applyToAll: boolean) => void
 }
 
-/** The conflict question itself (reused by the dedicated conflict window). */
+/** The conflict question, usable in a dialog or as a whole window. */
 export function ConflictView({ request, onAnswer }: ViewProps) {
   const { t } = useTranslation()
   const [applyToAll, setApplyToAll] = useState(false)
   const { conflict, existing, incoming, identical } = request
+  const folder = dirName(existing.path)
 
   const answer = (r: Resolution) => onAnswer(r, applyToAll)
 
   return (
     <div className="grid gap-4">
-      <DialogHeader>
-        <DialogTitle>{conflict.isUndo ? t('conflict.titleUndo') : t('conflict.title')}</DialogTitle>
-        <DialogDescription>
-          {t('conflict.description', {
-            name: baseName(existing.path),
-            folder: dirName(existing.path),
-          })}
-        </DialogDescription>
-      </DialogHeader>
+      <div className="grid gap-1">
+        <h2 className="text-base font-semibold">
+          {conflict.isUndo ? t('conflict.titleUndo') : t('conflict.title')}
+        </h2>
+        <p className="text-muted-foreground truncate text-sm" title={folder}>
+          {t('conflict.description', { name: baseName(existing.path), folder })}
+        </p>
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
         <FileCard title={t('conflict.existing')} file={existing} />
@@ -94,7 +89,7 @@ export function ConflictView({ request, onAnswer }: ViewProps) {
         </Label>
       </div>
 
-      <DialogFooter className="gap-2 sm:justify-between">
+      <div className="flex items-center justify-between gap-2">
         <Button variant="outline" onClick={() => answer('skip')} title={t('conflict.skipHint')}>
           {t('conflict.skip')}
         </Button>
@@ -110,34 +105,20 @@ export function ConflictView({ request, onAnswer }: ViewProps) {
             {t('conflict.keepBoth')}
           </Button>
         </div>
-      </DialogFooter>
+      </div>
     </div>
   )
 }
 
-/** Shows the conflicts raised by operations started from this window. */
+/** Modal for conflicts raised by operations started from this window. */
 export function ConflictDialog() {
-  const [queue, setQueue] = useState<ConflictRequest[]>([])
-
-  useEffect(() => {
-    if (!inTauri()) return
-    const un = onConflict((req) => setQueue((q) => [...q, req]))
-    return () => {
-      void un.then((f) => f())
-    }
-  }, [])
-
-  const current = queue[0]
-
-  const answer = (resolution: Resolution, applyToAll: boolean) => {
-    if (!current) return
-    void api.resolveConflict(current.id, { resolution, applyToAll })
-    setQueue((q) => q.slice(1))
-  }
-
+  const { t } = useTranslation()
+  const { current, answer } = useConflictQueue()
   return (
     <Dialog open={current !== undefined} onOpenChange={(o) => !o && answer('skip', false)}>
       <DialogContent className="sm:max-w-xl" showCloseButton={false}>
+        <DialogTitle className="sr-only">{t('conflict.title')}</DialogTitle>
+        <DialogDescription className="sr-only">{t('conflict.title')}</DialogDescription>
         {current && <ConflictView key={current.id} request={current} onAnswer={answer} />}
       </DialogContent>
     </Dialog>

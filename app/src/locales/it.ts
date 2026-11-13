@@ -156,6 +156,15 @@ const it: Messages = {
     applyToAll: 'Applica a tutti i conflitti rimanenti',
     reveal: 'Mostra nella cartella',
   },
+  summary: {
+    sorted_one: '{{count}} file ordinato',
+    sorted_other: '{{count}} file ordinati',
+    nothing: 'Niente da ordinare',
+    failed: 'Ordinamento non riuscito',
+    undo: 'Annulla',
+    details: 'Dettagli',
+    undone: 'Ordinamento annullato',
+  },
   update: {
     available: 'È disponibile Ordo {{version}}.',
     download: 'Scarica',

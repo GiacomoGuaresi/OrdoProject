@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
-import { listen, type UnlistenFn } from '@tauri-apps/api/event'
+import type { UnlistenFn } from '@tauri-apps/api/event'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 
 import type { BatchDetail } from '@/bindings/BatchDetail'
 import type { BatchSummary } from '@/bindings/BatchSummary'
@@ -34,10 +35,17 @@ export const api = {
   resolveConflict: (id: number, decision: Decision) =>
     invoke<boolean>('resolve_conflict', { id, decision }),
   revealPath: (path: string) => invoke<void>('reveal_path', { path }),
+  pendingConflicts: () => invoke<ConflictRequest[]>('pending_conflicts'),
+  openMain: (batch: number | null) => invoke<void>('open_main', { batch }),
+}
+
+export function onOpenBatch(handler: (batch: number) => void): Promise<UnlistenFn> {
+  return getCurrentWebviewWindow().listen<number>('open-batch', (e) => handler(e.payload))
 }
 
 export function onConflict(handler: (req: ConflictRequest) => void): Promise<UnlistenFn> {
-  return listen<ConflictRequest>('conflict', (e) => handler(e.payload))
+  // Scoped to this window: conflicts are addressed to a specific window.
+  return getCurrentWebviewWindow().listen<ConflictRequest>('conflict', (e) => handler(e.payload))
 }
 
 /** Whether the page runs inside Tauri (false in unit tests / plain browser). */

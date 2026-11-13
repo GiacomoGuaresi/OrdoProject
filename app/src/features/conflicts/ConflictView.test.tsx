@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { ConflictRequest } from '@/bindings/ConflictRequest'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
 
 import { ConflictView } from './ConflictDialog'
 
@@ -17,13 +16,7 @@ const request: ConflictRequest = {
 }
 
 function renderView(onAnswer = vi.fn()) {
-  render(
-    <Dialog open>
-      <DialogContent>
-        <ConflictView request={request} onAnswer={onAnswer} />
-      </DialogContent>
-    </Dialog>,
-  )
+  render(<ConflictView request={request} onAnswer={onAnswer} />)
   return onAnswer
 }
 

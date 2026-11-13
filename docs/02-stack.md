@@ -38,8 +38,12 @@ Directory dati per-utente standard del sistema (es. via crate `directories`):
 Problema: su Windows (e alcuni file manager Linux) una selezione di N file lancia N processi.
 
 Soluzione: **single-instance + aggregazione**
-- Il primo processo diventa "principale" (es. `tauri-plugin-single-instance` / lock + IPC locale).
-- I processi successivi inoltrano i propri path al principale e terminano subito.
+- Implementazione (`app/src-tauri/src/instance.rs`): ogni processo scrive prima la propria richiesta
+  in una cartella *inbox* (scrittura atomica), poi tenta un **lock esclusivo su file**.
+  Chi ottiene il lock è il principale e svuota periodicamente l'inbox; gli altri escono subito.
+  In uscita il principale rilascia il lock e ricontrolla l'inbox: nessuna richiesta va persa.
+  - Scartato `tauri-plugin-single-instance`: con avvii simultanei (caso tipico di Esplora risorse)
+    due processi potevano diventare entrambi principali.
 - Il principale attende una breve finestra di debounce (~300 ms, da tarare) e processa
   **tutti i path in un unico batch** → una notifica, un undo, una sequenza di dialog conflitti.
 
@@ -61,10 +65,12 @@ Due eseguibili distinti, stesso core:
 2. Single-instance: se esiste già un'istanza, i path vengono inoltrati e il processo esce.
 3. L'istanza principale **non apre la finestra principale**; attende il debounce e crea un batch.
 4. Esegue l'ordinamento tramite `ordo-core`; apre **solo** il dialog conflitti se necessario.
-5. Mostra la notifica di riepilogo con azione **"Annulla"**.
-6. Il processo **resta vivo ~10 s** per ricevere "Annulla" o click sulla notifica, poi esce.
-   - Su Windows si usa anche l'attivazione via protocollo/AUMID se il processo è già uscito.
-   - Dove le azioni nelle notifiche non sono supportate: click → apre la cronologia sul batch.
+5. Mostra il **riepilogo con "Annulla" e "Dettagli"** in una piccola finestra in stile toast
+   (in basso a destra, sempre in primo piano).
+6. Il riepilogo si chiude da solo dopo **~10 s** (pausa al passaggio del mouse); il processo esce
+   quando non restano finestre né ordinamenti in corso. "Dettagli" apre la cronologia sul batch.
+   - Decisione implementativa: le notifiche native di Tauri su desktop non supportano pulsanti
+     di azione; la finestra-toast offre lo stesso comportamento in modo identico sui 3 OS.
 
 ### Flusso "app"
 Avvio senza argomenti → finestra principale (Regole, Cronologia, Impostazioni).
