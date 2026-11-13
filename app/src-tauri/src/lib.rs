@@ -159,6 +159,8 @@ pub fn run() {
             commands::resolve_conflict,
             commands::open_main,
             commands::reveal_path,
+            commands::file_thumbnail,
+            commands::preview_file,
             commands::integration_status,
             commands::integration_install,
             commands::integration_uninstall,

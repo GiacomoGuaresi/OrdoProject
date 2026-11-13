@@ -172,6 +172,7 @@ const en = {
     skipHint: 'The file stays where it is',
     applyToAll: 'Apply to all remaining conflicts',
     reveal: 'Show in folder',
+    preview: 'Preview',
   },
   summary: {
     sorted_one: '{{count}} file sorted',

@@ -37,6 +37,8 @@ export const api = {
   resolveConflict: (id: number, decision: Decision) =>
     invoke<boolean>('resolve_conflict', { id, decision }),
   revealPath: (path: string) => invoke<void>('reveal_path', { path }),
+  fileThumbnail: (path: string) => invoke<string | null>('file_thumbnail', { path }),
+  previewFile: (path: string) => invoke<void>('preview_file', { path }),
   pendingConflicts: () => invoke<ConflictRequest[]>('pending_conflicts'),
   openMain: (batch: number | null) => invoke<void>('open_main', { batch }),
 

@@ -61,7 +61,7 @@ pub fn show_conflicts(app: &AppHandle) -> tauri::Result<()> {
         WebviewUrl::App("index.html#/conflicts".into()),
     )
     .title("Ordo")
-    .inner_size(640.0, 400.0)
+    .inner_size(660.0, 520.0)
     .resizable(false)
     .minimizable(false)
     .always_on_top(true)

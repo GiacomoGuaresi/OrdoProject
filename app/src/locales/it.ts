@@ -174,6 +174,7 @@ const it: Messages = {
     skipHint: 'Il file resta dov’è',
     applyToAll: 'Applica a tutti i conflitti rimanenti',
     reveal: 'Mostra nella cartella',
+    preview: 'Anteprima',
   },
   summary: {
     sorted_one: '{{count}} file ordinato',

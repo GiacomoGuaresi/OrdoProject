@@ -200,6 +200,61 @@ pub fn reveal_path(path: PathBuf) -> CmdResult<()> {
     tauri_plugin_opener::reveal_item_in_dir(&target).map_err(err)
 }
 
+/// Largest image turned into a thumbnail.
+const MAX_THUMBNAIL_BYTES: u64 = 15 * 1024 * 1024;
+
+fn image_mime(path: &std::path::Path) -> Option<&'static str> {
+    let ext = path.extension()?.to_str()?.to_ascii_lowercase();
+    Some(match ext.as_str() {
+        "png" => "image/png",
+        "jpg" | "jpeg" => "image/jpeg",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        "bmp" => "image/bmp",
+        "svg" => "image/svg+xml",
+        "avif" => "image/avif",
+        _ => return None,
+    })
+}
+
+/// A `data:` URL with the image, for the conflict dialog; `None` for other
+/// files or images that are too large.
+#[tauri::command]
+pub async fn file_thumbnail(path: PathBuf) -> Option<String> {
+    use base64::Engine;
+    let mime = image_mime(&path)?;
+    let meta = std::fs::metadata(&path).ok()?;
+    if !meta.is_file() || meta.len() > MAX_THUMBNAIL_BYTES {
+        return None;
+    }
+    let bytes = std::fs::read(&path).ok()?;
+    let data = base64::engine::general_purpose::STANDARD.encode(bytes);
+    Some(format!("data:{mime};base64,{data}"))
+}
+
+/// Shows a quick preview: Quick Look on macOS, the default app elsewhere.
+#[tauri::command]
+pub fn preview_file(path: PathBuf) -> CmdResult<()> {
+    if !path.is_file() {
+        return Err(format!("{} does not exist", path.display()));
+    }
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("qlmanage")
+            .arg("-p")
+            .arg(&path)
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .map(|_| ())
+            .map_err(err)
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        tauri_plugin_opener::open_path(&path, None::<&str>).map_err(err)
+    }
+}
+
 /// Executable that the file manager should start: the AppImage itself when
 /// running from one (the binary lives in a temporary mount), otherwise this
 /// process' executable.

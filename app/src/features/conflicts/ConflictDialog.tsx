@@ -1,5 +1,5 @@
-import { CopyCheck, FolderSearch } from 'lucide-react'
-import { useState } from 'react'
+import { CopyCheck, Eye, FileIcon, FolderSearch } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { ConflictRequest } from '@/bindings/ConflictRequest'
@@ -9,16 +9,41 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { api } from '@/lib/api'
+import { api, inTauri } from '@/lib/api'
 import { baseName, dirName, formatDateTime, formatSize } from '@/lib/format'
 
 import { useConflictQueue } from './useConflictQueue'
+
+function Thumbnail({ path }: { path: string }) {
+  const [src, setSrc] = useState<string | null>(null)
+  useEffect(() => {
+    if (!inTauri()) return
+    let cancelled = false
+    api
+      .fileThumbnail(path)
+      .then((s) => !cancelled && setSrc(s))
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [path])
+  return (
+    <div className="bg-background flex h-24 items-center justify-center overflow-hidden rounded-md border">
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-contain" />
+      ) : (
+        <FileIcon className="text-muted-foreground size-8" />
+      )}
+    </div>
+  )
+}
 
 function FileCard({ title, file }: { title: string; file: FileMeta }) {
   const { t, i18n } = useTranslation()
   return (
     <div className="bg-muted/40 flex min-w-0 flex-col gap-2 rounded-lg border p-3">
       <div className="text-muted-foreground text-xs font-medium tracking-wide uppercase">{title}</div>
+      <Thumbnail path={file.path} />
       <div className="truncate text-sm font-medium" title={file.path}>
         {file.name}
       </div>
@@ -28,15 +53,16 @@ function FileCard({ title, file }: { title: string; file: FileMeta }) {
         <dt className="text-muted-foreground">{t('conflict.modified')}</dt>
         <dd>{formatDateTime(file.modified, i18n.language)}</dd>
       </dl>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="self-start"
-        onClick={() => void api.revealPath(file.path)}
-      >
-        <FolderSearch data-icon="inline-start" />
-        {t('conflict.reveal')}
-      </Button>
+      <div className="flex flex-wrap gap-1">
+        <Button variant="ghost" size="sm" onClick={() => void api.previewFile(file.path)}>
+          <Eye data-icon="inline-start" />
+          {t('conflict.preview')}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => void api.revealPath(file.path)}>
+          <FolderSearch data-icon="inline-start" />
+          {t('conflict.reveal')}
+        </Button>
+      </div>
     </div>
   )
 }
