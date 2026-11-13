@@ -3,6 +3,7 @@
 pub mod error;
 pub mod fsops;
 pub mod history;
+pub mod integration;
 pub mod lang;
 pub mod model;
 pub mod paths;

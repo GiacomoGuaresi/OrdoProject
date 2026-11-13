@@ -44,6 +44,9 @@ pub enum Error {
     #[error("move not found: {0}")]
     MoveNotFound(i64),
 
+    #[error("system integration: {0}")]
+    Integration(String),
+
     #[error("cannot determine the user's home directory")]
     NoHomeDir,
 }
