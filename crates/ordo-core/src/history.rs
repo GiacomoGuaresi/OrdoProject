@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::{Error, Result};
 use crate::model::{ErrorCode, MoveStatus, OpError, Origin};
 
-const SCHEMA_VERSION: i32 = 1;
+const SCHEMA_VERSION: i32 = 2;
 
 const SCHEMA: &str = "
 CREATE TABLE IF NOT EXISTS batches (
@@ -36,6 +36,12 @@ CREATE TABLE IF NOT EXISTS moves (
 );
 CREATE INDEX IF NOT EXISTS moves_batch ON moves(batch_id);
 CREATE INDEX IF NOT EXISTS batches_created ON batches(created_at);
+CREATE TABLE IF NOT EXISTS ignored_types (
+    ext        TEXT    PRIMARY KEY,
+    count      INTEGER NOT NULL,
+    last_seen  INTEGER NOT NULL,
+    example    TEXT    NOT NULL
+);
 ";
 
 fn status_str(s: MoveStatus) -> &'static str {
@@ -209,6 +215,27 @@ pub struct BatchDetail {
     #[serde(flatten)]
     pub summary: BatchSummary,
     pub entries: Vec<Entry>,
+}
+
+/// A file extension that no rule matched, collected across sorts so the user
+/// can add rules for it later.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts-rs", derive(ts_rs::TS), ts(export))]
+#[serde(rename_all = "camelCase")]
+pub struct IgnoredType {
+    /// Lowercase extension without the dot, e.g. `sketch`.
+    pub ext: String,
+    /// How many files with this extension were ignored.
+    pub count: u32,
+    pub last_seen: DateTime<Utc>,
+    /// Name of the last ignored file, e.g. `design.sketch`.
+    pub example: String,
+}
+
+/// Lowercase extension of a file name (`None` without an extension).
+pub fn extension_of(file_name: &str) -> Option<String> {
+    let ext = std::path::Path::new(file_name).extension()?.to_str()?;
+    (!ext.is_empty()).then(|| ext.to_lowercase())
 }
 
 /// Handle to the history database.
@@ -401,6 +428,50 @@ impl History {
         }
     }
 
+    /// Records an ignored file (no rule matched).
+    pub fn record_ignored(&self, file_name: &str) -> Result<()> {
+        let Some(ext) = extension_of(file_name) else {
+            return Ok(());
+        };
+        self.conn.execute(
+            "INSERT INTO ignored_types (ext, count, last_seen, example) VALUES (?1, 1, ?2, ?3)
+             ON CONFLICT(ext) DO UPDATE SET count = count + 1, last_seen = ?2, example = ?3",
+            params![ext, now_ms(), file_name],
+        )?;
+        Ok(())
+    }
+
+    /// Ignored extensions, most recent first.
+    pub fn ignored_types(&self) -> Result<Vec<IgnoredType>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT ext, count, last_seen, example FROM ignored_types ORDER BY last_seen DESC, ext",
+        )?;
+        let rows = stmt.query_map([], |r| {
+            Ok(IgnoredType {
+                ext: r.get(0)?,
+                count: r.get(1)?,
+                last_seen: from_ms(r.get(2)?),
+                example: r.get(3)?,
+            })
+        })?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    /// Removes an extension from the ignored list.
+    pub fn dismiss_ignored(&self, ext: &str) -> Result<()> {
+        self.conn.execute(
+            "DELETE FROM ignored_types WHERE ext = ?1",
+            [ext.trim_start_matches('.').to_lowercase()],
+        )?;
+        Ok(())
+    }
+
+    /// Empties the ignored list.
+    pub fn clear_ignored(&self) -> Result<()> {
+        self.conn.execute("DELETE FROM ignored_types", [])?;
+        Ok(())
+    }
+
     /// Deletes the whole history.
     pub fn clear(&self) -> Result<()> {
         self.conn.execute("DELETE FROM batches", [])?;
@@ -518,6 +589,44 @@ mod tests {
 
         h.clear().unwrap();
         assert!(h.list_batches(10).unwrap().is_empty());
+    }
+
+    #[test]
+    fn ignored_types_are_collected() {
+        let h = History::open_in_memory().unwrap();
+        h.record_ignored("a.SKETCH").unwrap();
+        h.record_ignored("b.sketch").unwrap();
+        h.record_ignored("Makefile").unwrap(); // no extension: not recorded
+        h.record_ignored("c.xyz").unwrap();
+        let list = h.ignored_types().unwrap();
+        assert_eq!(list.len(), 2);
+        let sketch = list.iter().find(|t| t.ext == "sketch").unwrap();
+        assert_eq!(sketch.count, 2);
+        assert_eq!(sketch.example, "b.sketch");
+        // Not affected by history retention or clearing.
+        h.clear().unwrap();
+        assert_eq!(h.ignored_types().unwrap().len(), 2);
+        h.dismiss_ignored(".XYZ").unwrap();
+        assert_eq!(h.ignored_types().unwrap().len(), 1);
+        h.clear_ignored().unwrap();
+        assert!(h.ignored_types().unwrap().is_empty());
+    }
+
+    #[test]
+    fn upgrades_version_1_databases() {
+        let tmp = tempfile::tempdir().unwrap();
+        let path = tmp.path().join("h.sqlite");
+        {
+            let conn = Connection::open(&path).unwrap();
+            conn.execute_batch(
+                "CREATE TABLE batches (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at INTEGER NOT NULL, origin TEXT NOT NULL);
+                 PRAGMA user_version = 1;",
+            )
+            .unwrap();
+        }
+        let h = History::open(&path).unwrap();
+        h.record_ignored("a.abc").unwrap();
+        assert_eq!(h.ignored_types().unwrap().len(), 1);
     }
 
     #[test]

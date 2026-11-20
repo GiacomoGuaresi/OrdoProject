@@ -103,6 +103,10 @@ fn sorts_folder_contents_and_counts_ignored() {
 
     let batch = env.history.batch(report.batch_id.unwrap()).unwrap();
     assert_eq!(batch.entries.len(), 3);
+    let ignored = env.history.ignored_types().unwrap();
+    assert_eq!(ignored.len(), 1);
+    assert_eq!(ignored[0].ext, "sh");
+    assert_eq!(ignored[0].example, "script.sh");
     assert_eq!(batch.summary.origin, Origin::Cli);
 }
 

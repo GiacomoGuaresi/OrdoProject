@@ -14,7 +14,7 @@ pub mod sorter;
 pub mod undo;
 
 pub use error::{Error, Result};
-pub use history::{BatchDetail, BatchSummary, Entry, History, StatusCounts};
+pub use history::{BatchDetail, BatchSummary, Entry, History, IgnoredType, StatusCounts};
 pub use lang::Lang;
 pub use model::{
     Conflict, ConflictDetails, ConflictRequest, ConflictResolver, Decision, ErrorCode, FileMeta,

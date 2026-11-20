@@ -82,6 +82,11 @@ pub fn sort(
             None => *report.batch_id.insert(history.create_batch(origin)?),
         };
         history.add_entry(batch_id, &entry)?;
+        if entry.status == MoveStatus::Ignored
+            && let Some(name) = entry.source.file_name().and_then(|n| n.to_str())
+        {
+            history.record_ignored(name)?;
+        }
         report.counts.add(entry.status, 1);
         if let Some(error) = entry.error {
             report.errors.push(FileError {

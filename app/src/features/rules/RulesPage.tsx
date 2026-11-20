@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import type { IgnoredType } from '@/bindings/IgnoredType'
 import type { Rule } from '@/bindings/Rule'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { PageHeader } from '@/components/PageHeader'
@@ -32,6 +33,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { api, errorMessage, inTauri } from '@/lib/api'
 
+import { IgnoredTypes } from './IgnoredTypes'
 import { newRule } from './newRule'
 import { RuleDialog } from './RuleDialog'
 import { RuleRow } from './RuleRow'
@@ -42,6 +44,15 @@ export function RulesPage() {
   const [editing, setEditing] = useState<{ rule: Rule; isNew: boolean } | null>(null)
   const [deleting, setDeleting] = useState<Rule | null>(null)
   const [confirmDefaults, setConfirmDefaults] = useState(false)
+  const [ignored, setIgnored] = useState<IgnoredType[]>([])
+
+  const loadIgnored = useCallback(() => {
+    if (!inTauri()) return
+    api
+      .listIgnoredTypes()
+      .then(setIgnored)
+      .catch((e) => toast.error(errorMessage(e)))
+  }, [])
 
   useEffect(() => {
     if (!inTauri()) return
@@ -49,7 +60,8 @@ export function RulesPage() {
       .getRules()
       .then((set) => setRules(set.rules))
       .catch((e) => toast.error(errorMessage(e)))
-  }, [])
+    loadIgnored()
+  }, [loadIgnored])
 
   /** Applies a change locally and persists it; reverts on failure. */
   const commit = useCallback(
@@ -59,12 +71,14 @@ export function RulesPage() {
       if (!inTauri()) return
       try {
         await api.saveRules({ version: 1, rules: next })
+        // A new or changed rule may now cover some ignored types.
+        loadIgnored()
       } catch (e) {
         setRules(previous)
         toast.error(errorMessage(e))
       }
     },
-    [rules],
+    [rules, loadIgnored],
   )
 
   const sensors = useSensors(
@@ -184,6 +198,28 @@ export function RulesPage() {
           </SortableContext>
         </DndContext>
       )}
+
+      <IgnoredTypes
+        types={ignored}
+        onCreateRule={(type) =>
+          setEditing({
+            rule: {
+              ...newRule(),
+              name: t('rules.ignoredRuleName', { ext: type.ext.toUpperCase() }),
+              pattern: `*.${type.ext}`,
+            },
+            isNew: true,
+          })
+        }
+        onDismiss={(type) => {
+          setIgnored((list) => list.filter((x) => x.ext !== type.ext))
+          api.dismissIgnoredType(type.ext).catch((e) => toast.error(errorMessage(e)))
+        }}
+        onClear={() => {
+          setIgnored([])
+          api.clearIgnoredTypes().catch((e) => toast.error(errorMessage(e)))
+        }}
+      />
 
       <RuleDialog
         rule={editing?.rule ?? null}

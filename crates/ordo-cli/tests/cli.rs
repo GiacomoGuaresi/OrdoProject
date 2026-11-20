@@ -288,3 +288,25 @@ fn integration_status_and_missing_app() {
         .code(1)
         .stderr(predicate::str::contains("does not exist"));
 }
+
+#[test]
+fn ignored_types_list() {
+    let env = Env::new();
+    env.add_rules();
+    env.file("in/a.sh", "A");
+    env.file("in/b.SH", "B");
+    env.file("in/c.pdf", "C");
+    env.ordo().args(["sort", "in"]).assert().success();
+    let list = env.json(&["ignored"]);
+    assert_eq!(list.as_array().unwrap().len(), 1);
+    assert_eq!(list[0]["ext"], "sh");
+    assert_eq!(list[0]["count"], 2);
+    // A new rule covering the extension removes it from the list.
+    env.ordo()
+        .args([
+            "rules", "add", "--name", "Scripts", "--glob", "*.sh", "--dest", "out/sh",
+        ])
+        .assert()
+        .success();
+    assert!(env.json(&["ignored"]).as_array().unwrap().is_empty());
+}

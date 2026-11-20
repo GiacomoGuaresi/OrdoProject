@@ -112,6 +112,15 @@ enum Command {
     /// Manage the sorting rules.
     #[command(subcommand)]
     Rules(RulesCommand),
+    /// File types that no rule matched (to add rules for them).
+    Ignored {
+        /// Remove an extension from the list.
+        #[arg(long, value_name = "EXT")]
+        dismiss: Option<String>,
+        /// Empty the list.
+        #[arg(long, conflicts_with = "dismiss")]
+        clear: bool,
+    },
     /// Install or remove the "Sort with Ordo" context-menu entry.
     #[command(subcommand)]
     Integration(IntegrationCommand),
@@ -255,6 +264,7 @@ fn run(cli: Cli) -> Result<u8> {
         } => cmd_undo(&ctx, batch, move_id, &conflict),
         Command::History { batch, limit } => cmd_history(&ctx, batch, limit),
         Command::Rules(cmd) => cmd_rules(&ctx, cmd),
+        Command::Ignored { dismiss, clear } => cmd_ignored(&ctx, dismiss, clear),
         Command::Integration(cmd) => cmd_integration(&ctx, cmd),
     }
 }
@@ -610,6 +620,39 @@ fn cmd_rules(ctx: &Ctx, cmd: RulesCommand) -> Result<u8> {
     } else {
         println!("{msg}");
     }
+    Ok(exit::OK)
+}
+
+fn cmd_ignored(ctx: &Ctx, dismiss: Option<String>, clear: bool) -> Result<u8> {
+    let history = ctx.history()?;
+    if clear {
+        history.clear_ignored()?;
+    } else if let Some(ext) = dismiss {
+        history.dismiss_ignored(&ext)?;
+    }
+    let types = ctx
+        .rules()?
+        .compile()?
+        .still_ignored(history.ignored_types()?);
+    if ctx.json {
+        ctx.print_json(&types);
+        return Ok(exit::OK);
+    }
+    let tr = ctx.tr;
+    if types.is_empty() {
+        println!("{}", tr.t("ignored.empty", &[]));
+        return Ok(exit::OK);
+    }
+    for t in &types {
+        println!(
+            "  .{:<12} {:>5}  {}  ({})",
+            t.ext,
+            t.count,
+            t.last_seen.with_timezone(&Local).format("%Y-%m-%d"),
+            t.example
+        );
+    }
+    println!("{}", tr.t("ignored.hint", &[]));
     Ok(exit::OK)
 }
 

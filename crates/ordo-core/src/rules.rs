@@ -233,6 +233,17 @@ pub struct CompiledRules {
 }
 
 impl CompiledRules {
+    /// Keeps the ignored types that no enabled rule matches anymore.
+    pub fn still_ignored(
+        &self,
+        types: Vec<crate::history::IgnoredType>,
+    ) -> Vec<crate::history::IgnoredType> {
+        types
+            .into_iter()
+            .filter(|t| self.first_match(&t.example).is_none())
+            .collect()
+    }
+
     /// Returns the first rule matching `file_name`.
     pub fn first_match(&self, file_name: &str) -> Option<&Rule> {
         self.rules

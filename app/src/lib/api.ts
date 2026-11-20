@@ -4,6 +4,7 @@ import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 
 import type { BatchDetail } from '@/bindings/BatchDetail'
 import type { CommandStatus } from '@/bindings/CommandStatus'
+import type { IgnoredType } from '@/bindings/IgnoredType'
 import type { IntegrationStatus } from '@/bindings/IntegrationStatus'
 import type { BatchSummary } from '@/bindings/BatchSummary'
 import type { ConflictRequest } from '@/bindings/ConflictRequest'
@@ -31,6 +32,9 @@ export const api = {
   listBatches: (limit: number) => invoke<BatchSummary[]>('list_batches', { limit }),
   getBatch: (id: number) => invoke<BatchDetail>('get_batch', { id }),
   clearHistory: () => invoke<void>('clear_history'),
+  listIgnoredTypes: () => invoke<IgnoredType[]>('list_ignored_types'),
+  dismissIgnoredType: (ext: string) => invoke<void>('dismiss_ignored_type', { ext }),
+  clearIgnoredTypes: () => invoke<void>('clear_ignored_types'),
   undoBatch: (id: number) => invoke<UndoReport>('undo_batch', { id }),
   undoMove: (id: number) => invoke<UndoOutcome>('undo_move', { id }),
 

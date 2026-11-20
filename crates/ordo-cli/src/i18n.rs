@@ -150,6 +150,17 @@ const MESSAGES: &[(&str, &str, &str)] = &[
     ),
     ("rules.off", "off", "off"),
     // generic
+    // ignored types
+    (
+        "ignored.empty",
+        "No ignored file types.",
+        "Nessun tipo di file ignorato.",
+    ),
+    (
+        "ignored.hint",
+        "Add a rule with `ordo rules add --glob '*.<ext>' …`",
+        "Aggiungi una regola con `ordo rules add --glob '*.<ext>' …`",
+    ),
     // integration
     ("integration.installed", "installed", "installata"),
     (

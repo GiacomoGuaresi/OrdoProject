@@ -5,8 +5,8 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 
 use ordo_core::{
-    AppPaths, BatchDetail, BatchSummary, ConflictRequest, Decision, History, Lang, Rule, RuleSet,
-    Settings, UndoOutcome, UndoReport,
+    AppPaths, BatchDetail, BatchSummary, ConflictRequest, Decision, History, IgnoredType, Lang,
+    Rule, RuleSet, Settings, UndoOutcome, UndoReport,
 };
 use tauri::{AppHandle, State, WebviewWindow};
 
@@ -118,6 +118,27 @@ pub fn list_batches(state: State<'_, AppState>, limit: usize) -> CmdResult<Vec<B
 #[tauri::command]
 pub fn get_batch(state: State<'_, AppState>, id: i64) -> CmdResult<BatchDetail> {
     state.history()?.batch(id).map_err(err)
+}
+
+/// Extensions of ignored files that no enabled rule matches yet.
+#[tauri::command]
+pub fn list_ignored_types(state: State<'_, AppState>) -> CmdResult<Vec<IgnoredType>> {
+    let lang = state.settings()?.effective_lang();
+    let rules = RuleSet::load_or_init(&state.paths.rules_file(), lang)
+        .and_then(|r| r.compile())
+        .map_err(err)?;
+    let types = state.history()?.ignored_types().map_err(err)?;
+    Ok(rules.still_ignored(types))
+}
+
+#[tauri::command]
+pub fn dismiss_ignored_type(state: State<'_, AppState>, ext: String) -> CmdResult<()> {
+    state.history()?.dismiss_ignored(&ext).map_err(err)
+}
+
+#[tauri::command]
+pub fn clear_ignored_types(state: State<'_, AppState>) -> CmdResult<()> {
+    state.history()?.clear_ignored().map_err(err)
 }
 
 #[tauri::command]
