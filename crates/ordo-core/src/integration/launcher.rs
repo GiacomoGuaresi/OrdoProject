@@ -242,8 +242,16 @@ pub fn install(home: &Path, app_exe: &Path) -> Result<()> {
 /// app was moved or reinstalled elsewhere).
 pub fn is_outdated(home: &Path, app_exe: &Path) -> bool {
     if cfg!(target_os = "macos") {
-        std::fs::read_to_string(macos_path(home).join("Contents/MacOS/ordo-quick-sort"))
-            .is_ok_and(|s| s != macos_script(app_exe))
+        let bundle = macos_path(home);
+        let script_changed = std::fs::read_to_string(bundle.join("Contents/MacOS/ordo-quick-sort"))
+            .is_ok_and(|s| s != macos_script(app_exe));
+        // The app's icon may have changed with an update.
+        let icon_changed = enclosing_bundle(app_exe).is_some_and(|app| {
+            let source = std::fs::read(app.join("Contents/Resources/icon.icns")).ok();
+            let copy = std::fs::read(bundle.join("Contents/Resources/icon.icns")).ok();
+            source.is_some() && source != copy
+        });
+        script_changed || icon_changed
     } else if cfg!(windows) {
         false
     } else {
