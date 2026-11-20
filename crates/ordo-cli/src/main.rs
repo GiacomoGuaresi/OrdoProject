@@ -429,6 +429,7 @@ fn origin_label(lang: Lang, b: &BatchSummary) -> &'static str {
         Origin::ContextMenu if it => "menu contest.",
         Origin::ContextMenu => "context menu",
         Origin::App => "app",
+        Origin::Launcher => "launcher",
     }
 }
 
@@ -638,17 +639,17 @@ fn find_app(explicit: Option<PathBuf>) -> Result<PathBuf> {
 }
 
 fn cmd_integration(ctx: &Ctx, cmd: IntegrationCommand) -> Result<u8> {
-    use ordo_core::integration::ContextMenu;
+    use ordo_core::integration::Integration;
     let tr = ctx.tr;
     let status = match cmd {
         IntegrationCommand::Install { app } => {
-            ContextMenu::new(find_app(app)?, ctx.lang())?.install()?
+            Integration::new(find_app(app)?, ctx.lang())?.install()?
         }
         IntegrationCommand::Uninstall => {
             // The app path is not needed to remove the entries.
-            ContextMenu::new(PathBuf::new(), ctx.lang())?.uninstall()?
+            Integration::new(PathBuf::new(), ctx.lang())?.uninstall()?
         }
-        IntegrationCommand::Status => ContextMenu::new(PathBuf::new(), ctx.lang())?.status(),
+        IntegrationCommand::Status => Integration::new(PathBuf::new(), ctx.lang())?.status(),
     };
     if ctx.json {
         ctx.print_json(&status);

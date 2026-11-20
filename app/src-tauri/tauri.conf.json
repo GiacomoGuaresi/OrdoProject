@@ -54,7 +54,8 @@
     },
     "linux": {
       "deb": {
-        "section": "utils"
+        "section": "utils",
+        "desktopTemplate": "ordo-settings.desktop"
       }
     }
   }

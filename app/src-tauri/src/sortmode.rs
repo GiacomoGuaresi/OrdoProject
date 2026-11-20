@@ -44,6 +44,8 @@ pub fn parse_sort_args<S: AsRef<str>>(args: &[S], cwd: &Path) -> Option<Vec<Path
 #[derive(Default)]
 pub struct SortQueue {
     pending: Mutex<Vec<PathBuf>>,
+    /// Origin recorded for the next batch.
+    origin: Mutex<Option<Origin>>,
     generation: AtomicU64,
     /// A batch is collecting or running.
     busy: AtomicBool,
@@ -58,11 +60,12 @@ impl SortQueue {
     }
 
     /// Adds paths and (re)starts the debounce timer.
-    pub fn add(&self, app: &AppHandle, paths: Vec<PathBuf>) {
+    pub fn add(&self, app: &AppHandle, paths: Vec<PathBuf>, origin: Origin) {
         if paths.is_empty() {
             return;
         }
         self.pending.lock().expect("poisoned").extend(paths);
+        *self.origin.lock().expect("poisoned") = Some(origin);
         self.busy.store(true, Ordering::SeqCst);
         let generation = self.generation.fetch_add(1, Ordering::SeqCst) + 1;
         let app = app.clone();
@@ -76,7 +79,13 @@ impl SortQueue {
             let _guard = queue.running.lock().expect("poisoned");
             let paths = std::mem::take(&mut *queue.pending.lock().expect("poisoned"));
             if !paths.is_empty() {
-                run_batch(&app, &state, &paths);
+                let origin = queue
+                    .origin
+                    .lock()
+                    .expect("poisoned")
+                    .take()
+                    .unwrap_or(Origin::ContextMenu);
+                run_batch(&app, &state, &paths, origin);
             }
             if queue.generation.load(Ordering::SeqCst) == generation {
                 queue.busy.store(false, Ordering::SeqCst);
@@ -86,7 +95,7 @@ impl SortQueue {
     }
 }
 
-fn run_batch(app: &AppHandle, state: &AppState, paths: &[PathBuf]) {
+fn run_batch(app: &AppHandle, state: &AppState, paths: &[PathBuf], origin: Origin) {
     let result = (|| -> ordo_core::Result<Option<i64>> {
         let settings = Settings::load(&state.paths.settings_file())?;
         let rules = RuleSet::load_or_init(&state.paths.rules_file(), settings.effective_lang())?
@@ -99,7 +108,7 @@ fn run_batch(app: &AppHandle, state: &AppState, paths: &[PathBuf]) {
                     log::error!("cannot open the conflict window: {e}");
                 }
             });
-        let report = ordo_core::sort(paths, &rules, Origin::ContextMenu, &mut resolver, &history)?;
+        let report = ordo_core::sort(paths, &rules, origin, &mut resolver, &history)?;
         Ok(report.batch_id)
     })();
     windows::close(app, windows::CONFLICTS);

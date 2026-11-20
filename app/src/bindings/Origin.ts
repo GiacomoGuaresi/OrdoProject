@@ -3,4 +3,4 @@
 /**
  * Where a sort was started from.
  */
-export type Origin = "cli" | "context_menu" | "app";
+export type Origin = "cli" | "context_menu" | "app" | "launcher";

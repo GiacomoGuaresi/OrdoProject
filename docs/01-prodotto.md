@@ -37,8 +37,11 @@
 - **Menu contestuale** del file manager (Finder, Esplora risorse, file manager Linux):
   file singolo, selezione multipla, cartella, sfondo della cartella aperta.
 - **CLI** (es. `ordo sort <path>`), utilizzabile da terminale e script.
-- L'app grafica **non** avvia ordinamenti (niente drag & drop né pulsante "ordina"):
-  serve a configurare regole e a consultare/annullare la cronologia.
+- **App "Ordo" nel launcher** (Launchpad/Spotlight, menu Start, menu applicazioni Linux):
+  aprirla **ordina subito** le cartelle scelte nelle Impostazioni (default: **Scrivania**),
+  con lo stesso riepilogo e "Annulla" del menu contestuale. *(Decisione del 2026-11-20.)*
+- L'app grafica vera e propria si chiama **"Ordo - Settings"**: serve a configurare regole e
+  impostazioni e a consultare/annullare la cronologia (niente drag & drop né pulsante "ordina").
 
 ## CLI `ordo` — comandi (prima versione)
 | Comando | Descrizione |

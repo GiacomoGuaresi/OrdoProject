@@ -2,6 +2,21 @@
 
 L'integrazione con il menu contestuale si installa/rimuove **dall'app** (Impostazioni).
 
+## App "Ordo" nel launcher (ordinamento rapido)
+Installata/rimossa insieme alla voce del menu contestuale (Impostazioni → File manager, o
+`ordo integration install`). Avvia l'app con `--quick-sort`, che ordina le cartelle configurate
+in Impostazioni (`quickSortFolders`, default Scrivania); in cronologia l'origine è "launcher".
+
+| OS | Meccanismo |
+|---|---|
+| macOS | mini-bundle `~/Applications/Ordo.app` (eseguibile = script che lancia `open -n -a "Ordo - Settings.app" --args --quick-sort`, icona copiata dall'app, `LSUIElement`), registrato con `lsregister` |
+| Windows | collegamento `Ordo.lnk` nel menu Start dell'utente (creato via WScript.Shell) |
+| Linux | voce `~/.local/share/applications/io.github.giacomoguaresi.ordo.launcher.desktop` |
+
+L'app principale è pubblicata come **"Ordo - Settings"** (`productName` in `tauri.macos.conf.json`
+e `tauri.windows.conf.json`; su Linux il pacchetto resta `ordo` ma la voce desktop si chiama
+"Ordo - Settings", via `ordo-settings.desktop`).
+
 ## Comando `ordo` nel PATH
 Pulsante in Impostazioni **"Installa il comando `ordo` nel terminale"** (modello VS Code):
 | OS | Meccanismo |

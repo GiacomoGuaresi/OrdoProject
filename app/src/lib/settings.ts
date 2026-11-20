@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: Settings = {
   retentionDays: 90,
   checkUpdates: true,
   onboardingDone: false,
+  quickSortFolders: [],
 }
 
 export interface SettingsContextValue {

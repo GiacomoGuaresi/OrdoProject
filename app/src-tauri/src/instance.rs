@@ -19,14 +19,23 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use ordo_core::Origin;
 use serde::{Deserialize, Serialize};
+
+fn context_menu() -> Origin {
+    Origin::ContextMenu
+}
 
 /// A request sent to the primary instance.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Message {
     /// Sort these (absolute) paths.
-    Sort { paths: Vec<PathBuf> },
+    Sort {
+        paths: Vec<PathBuf>,
+        #[serde(default = "context_menu")]
+        origin: Origin,
+    },
     /// Show the main window.
     Show,
 }
@@ -127,6 +136,7 @@ mod tests {
         assert!(dir.drain().is_empty());
         assert!(!dir.has_pending());
         let a = Message::Sort {
+            origin: Origin::Launcher,
             paths: vec!["/a".into()],
         };
         dir.send(&a).unwrap();
@@ -156,6 +166,7 @@ mod tests {
                 let dir = dir.clone();
                 std::thread::spawn(move || {
                     dir.send(&Message::Sort {
+                        origin: Origin::ContextMenu,
                         paths: vec![format!("/f{i}").into()],
                     })
                     .unwrap()

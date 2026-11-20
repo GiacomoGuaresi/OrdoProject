@@ -13,6 +13,8 @@ pub enum Origin {
     Cli,
     ContextMenu,
     App,
+    /// The "Ordo" launcher (quick sort of the configured folders).
+    Launcher,
 }
 
 /// State of a single entry of a batch.

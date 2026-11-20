@@ -21,4 +21,8 @@ checkUpdates: boolean,
 /**
  * Whether the first-launch onboarding has been completed.
  */
-onboardingDone: boolean, };
+onboardingDone: boolean, 
+/**
+ * Folders sorted by the "Ordo" launcher; empty means the Desktop.
+ */
+quickSortFolders: Array<string>, };

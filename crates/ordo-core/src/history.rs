@@ -67,6 +67,7 @@ fn origin_str(o: Origin) -> &'static str {
         Origin::Cli => "cli",
         Origin::ContextMenu => "context_menu",
         Origin::App => "app",
+        Origin::Launcher => "launcher",
     }
 }
 
@@ -74,6 +75,7 @@ fn parse_origin(s: &str) -> Origin {
     match s {
         "context_menu" => Origin::ContextMenu,
         "app" => Origin::App,
+        "launcher" => Origin::Launcher,
         _ => Origin::Cli,
     }
 }

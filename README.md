@@ -28,21 +28,26 @@ Download the installer for your system from the
 
 | System | File |
 |---|---|
-| macOS (Apple Silicon) | `Ordo_<version>_aarch64.dmg` |
-| macOS (Intel) | `Ordo_<version>_x64.dmg` |
-| Windows | `Ordo_<version>_x64-setup.exe` |
+| macOS (Apple Silicon) | `Ordo - Settings_<version>_aarch64.dmg` |
+| macOS (Intel) | `Ordo - Settings_<version>_x64.dmg` |
+| Windows | `Ordo - Settings_<version>_x64-setup.exe` |
 | Linux | `.AppImage` or `.deb` |
 
-On first launch Ordo offers to add **Sort with Ordo** to your file manager's
-context menu. You can add or remove it at any time in **Settings → File manager**,
+Ordo comes as two apps in your launcher (Launchpad/Spotlight, Start menu, app menu):
+
+- **Ordo** sorts your Desktop (or the folders you choose in Settings) right away;
+- **Ordo - Settings** opens rules, history and settings.
+
+On first launch *Ordo - Settings* offers to add **Sort with Ordo** to your file
+manager's context menu and the **Ordo** app to your launcher. You can add or remove it at any time in **Settings → File manager**,
 together with the `ordo` terminal command.
 
 ### Opening Ordo the first time (unsigned builds)
 
 The builds are not code-signed yet, so the system warns you once:
 
-- **macOS**: right-click `Ordo.app` → **Open** → **Open**. Or, from a terminal:
-  `xattr -dr com.apple.quarantine /Applications/Ordo.app`
+- **macOS**: right-click `Ordo - Settings.app` → **Open** → **Open**. Or, from a terminal:
+  `xattr -dr com.apple.quarantine "/Applications/Ordo - Settings.app"`
 - **Windows**: in the SmartScreen dialog click **More info** → **Run anyway**.
 - **Linux (AppImage)**: make it executable (`chmod +x Ordo_*.AppImage`) and run it.
 

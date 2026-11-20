@@ -8,6 +8,7 @@
 //! possible.
 
 pub mod command;
+pub mod launcher;
 pub mod linux;
 pub mod macos;
 #[cfg(windows)]
@@ -67,9 +68,9 @@ pub fn menu_label(lang: Lang) -> &'static str {
     }
 }
 
-/// Context-menu integration for the current user.
+/// Context-menu entry and "Ordo" launcher for the current user.
 #[derive(Debug, Clone)]
-pub struct ContextMenu {
+pub struct Integration {
     /// Executable of the desktop app, started with `--sort <paths…>`.
     pub app_exe: PathBuf,
     /// Language of the menu entry.
@@ -78,7 +79,7 @@ pub struct ContextMenu {
     pub home: PathBuf,
 }
 
-impl ContextMenu {
+impl Integration {
     pub fn new(app_exe: impl Into<PathBuf>, lang: Lang) -> Result<Self> {
         let home = directories::BaseDirs::new()
             .ok_or(Error::NoHomeDir)?
@@ -106,6 +107,8 @@ impl ContextMenu {
         } else {
             linux::status(&self.home)
         };
+        let mut items = items;
+        items.push(launcher::status(&self.home));
         IntegrationStatus { items }
     }
 
@@ -125,6 +128,7 @@ impl ContextMenu {
         } else {
             linux::install(&self.home, &self.app_exe, self.lang, &linux::detect())?;
         }
+        launcher::install(&self.home, &self.app_exe)?;
         Ok(self.status())
     }
 
@@ -137,6 +141,7 @@ impl ContextMenu {
         } else {
             linux::uninstall(&self.home)?;
         }
+        launcher::uninstall(&self.home)?;
         Ok(self.status())
     }
 }

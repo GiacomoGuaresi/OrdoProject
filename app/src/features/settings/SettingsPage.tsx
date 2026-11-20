@@ -18,6 +18,7 @@ import { LANGUAGES } from '@/lib/i18n'
 import { useSettings } from '@/lib/settings'
 
 import { IntegrationSection } from './IntegrationSection'
+import { QuickSortFolders } from './QuickSortFolders'
 
 export const REPO_URL = 'https://github.com/GiacomoGuaresi/OrdoProject'
 
@@ -111,6 +112,7 @@ export function SettingsPage() {
 
       <Section title={t('settings.integration')}>
         <IntegrationSection />
+        <QuickSortFolders />
       </Section>
 
       <Separator />

@@ -11,7 +11,7 @@ use ordo_core::{
 use tauri::{AppHandle, State, WebviewWindow};
 
 use ordo_core::integration::command::{self, CommandStatus};
-use ordo_core::integration::{ContextMenu, IntegrationStatus};
+use ordo_core::integration::{Integration, IntegrationStatus};
 
 use crate::conflicts::{ConflictBroker, DialogResolver};
 use crate::instance::InstanceDir;
@@ -273,9 +273,9 @@ fn app_executable() -> CmdResult<PathBuf> {
     std::env::current_exe().map_err(err)
 }
 
-fn context_menu(state: &AppState) -> CmdResult<ContextMenu> {
+fn context_menu(state: &AppState) -> CmdResult<Integration> {
     let lang = state.settings()?.effective_lang();
-    ContextMenu::new(app_executable()?, lang).map_err(err)
+    Integration::new(app_executable()?, lang).map_err(err)
 }
 
 #[tauri::command]

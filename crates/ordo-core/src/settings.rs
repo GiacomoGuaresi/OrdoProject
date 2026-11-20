@@ -40,6 +40,8 @@ pub struct Settings {
     pub check_updates: bool,
     /// Whether the first-launch onboarding has been completed.
     pub onboarding_done: bool,
+    /// Folders sorted by the "Ordo" launcher; empty means the Desktop.
+    pub quick_sort_folders: Vec<std::path::PathBuf>,
 }
 
 impl Default for Settings {
@@ -51,6 +53,7 @@ impl Default for Settings {
             retention_days: Some(DEFAULT_RETENTION_DAYS),
             check_updates: true,
             onboarding_done: false,
+            quick_sort_folders: Vec::new(),
         }
     }
 }
@@ -86,6 +89,21 @@ impl Settings {
     pub fn effective_lang(&self) -> Lang {
         self.language.unwrap_or_else(Lang::system)
     }
+
+    /// Folders sorted by the "Ordo" launcher: the configured ones, or the Desktop.
+    pub fn quick_sort_targets(&self) -> Vec<std::path::PathBuf> {
+        if !self.quick_sort_folders.is_empty() {
+            return self.quick_sort_folders.clone();
+        }
+        directories::UserDirs::new()
+            .map(|d| {
+                d.desktop_dir()
+                    .map(Path::to_path_buf)
+                    .unwrap_or_else(|| d.home_dir().join("Desktop"))
+            })
+            .into_iter()
+            .collect()
+    }
 }
 
 #[cfg(test)]
@@ -118,6 +136,21 @@ mod tests {
         assert_eq!(s.theme, Theme::Light);
         assert!(s.check_updates);
         assert_eq!(s.effective_lang(), s.language.unwrap_or_else(Lang::system));
+    }
+
+    #[test]
+    fn quick_sort_targets_default_to_desktop() {
+        let s = Settings::default();
+        let targets = s.quick_sort_targets();
+        assert_eq!(targets.len(), 1);
+        let custom = Settings {
+            quick_sort_folders: vec!["/a".into(), "/b".into()],
+            ..Settings::default()
+        };
+        assert_eq!(
+            custom.quick_sort_targets(),
+            vec![std::path::PathBuf::from("/a"), "/b".into()]
+        );
     }
 
     #[test]

@@ -16,7 +16,8 @@ use std::time::Duration;
 
 use commands::AppState;
 use instance::{InstanceDir, Message};
-use ordo_core::AppPaths;
+use ordo_core::integration::launcher::QUICK_SORT_FLAG;
+use ordo_core::{AppPaths, Origin, Settings};
 use tauri::{AppHandle, Manager, RunEvent, WindowEvent};
 
 /// How often the primary instance checks for requests from other processes.
@@ -44,7 +45,9 @@ pub(crate) fn exit_if_idle(app: &AppHandle) {
 
 fn dispatch(app: &AppHandle, message: Message) {
     match message {
-        Message::Sort { paths } => app.state::<AppState>().sort_queue.add(app, paths),
+        Message::Sort { paths, origin } => {
+            app.state::<AppState>().sort_queue.add(app, paths, origin)
+        }
         Message::Show => {
             if let Err(e) = windows::show_main(app, None) {
                 log::error!("cannot open the main window: {e}");
@@ -87,9 +90,21 @@ pub fn run() {
     let instance = InstanceDir::new(&paths.data_dir);
     let args: Vec<String> = std::env::args().collect();
     let cwd = std::env::current_dir().unwrap_or_default();
-    let message = match sortmode::parse_sort_args(&args, &cwd) {
-        Some(paths) => Message::Sort { paths },
-        None => Message::Show,
+    let message = if args.iter().any(|a| a == QUICK_SORT_FLAG) {
+        // The "Ordo" launcher: sort the folders chosen in the settings.
+        let settings = Settings::load(&paths.settings_file()).unwrap_or_default();
+        Message::Sort {
+            paths: settings.quick_sort_targets(),
+            origin: Origin::Launcher,
+        }
+    } else {
+        match sortmode::parse_sort_args(&args, &cwd) {
+            Some(paths) => Message::Sort {
+                paths,
+                origin: Origin::ContextMenu,
+            },
+            None => Message::Show,
+        }
     };
 
     // Hand the request over first, then find out whether we are the primary.
