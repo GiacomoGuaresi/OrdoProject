@@ -42,6 +42,9 @@ pub struct Settings {
     pub onboarding_done: bool,
     /// Folders sorted by the "Ordo" launcher; empty means the Desktop.
     pub quick_sort_folders: Vec<std::path::PathBuf>,
+    /// The "Ordo" launcher was installed automatically once (it is not
+    /// re-created if the user removes it).
+    pub launcher_offered: bool,
 }
 
 impl Default for Settings {
@@ -54,6 +57,7 @@ impl Default for Settings {
             check_updates: true,
             onboarding_done: false,
             quick_sort_folders: Vec::new(),
+            launcher_offered: false,
         }
     }
 }

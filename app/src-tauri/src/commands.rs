@@ -273,6 +273,29 @@ fn app_executable() -> CmdResult<PathBuf> {
     std::env::current_exe().map_err(err)
 }
 
+/// On start: create the "Ordo" launcher the first time and keep it pointing
+/// at this app. Skipped in development builds.
+pub fn ensure_launcher(state: &AppState) {
+    if cfg!(debug_assertions) {
+        return;
+    }
+    let result = (|| -> CmdResult<()> {
+        let mut settings = state.settings()?;
+        let integration = context_menu(state)?;
+        integration
+            .ensure_launcher(settings.launcher_offered)
+            .map_err(err)?;
+        if !settings.launcher_offered {
+            settings.launcher_offered = true;
+            settings.save(&state.paths.settings_file()).map_err(err)?;
+        }
+        Ok(())
+    })();
+    if let Err(e) = result {
+        log::warn!("cannot set up the Ordo launcher: {e}");
+    }
+}
+
 fn context_menu(state: &AppState) -> CmdResult<Integration> {
     let lang = state.settings()?.effective_lang();
     Integration::new(app_executable()?, lang).map_err(err)

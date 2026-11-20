@@ -25,4 +25,9 @@ onboardingDone: boolean,
 /**
  * Folders sorted by the "Ordo" launcher; empty means the Desktop.
  */
-quickSortFolders: Array<string>, };
+quickSortFolders: Array<string>, 
+/**
+ * The "Ordo" launcher was installed automatically once (it is not
+ * re-created if the user removes it).
+ */
+launcherOffered: boolean, };

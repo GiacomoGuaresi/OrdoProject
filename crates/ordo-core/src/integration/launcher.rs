@@ -238,6 +238,37 @@ pub fn install(home: &Path, app_exe: &Path) -> Result<()> {
     }
 }
 
+/// Whether the installed launcher starts a different app executable (the
+/// app was moved or reinstalled elsewhere).
+pub fn is_outdated(home: &Path, app_exe: &Path) -> bool {
+    if cfg!(target_os = "macos") {
+        std::fs::read_to_string(macos_path(home).join("Contents/MacOS/ordo-quick-sort"))
+            .is_ok_and(|s| s != macos_script(app_exe))
+    } else if cfg!(windows) {
+        false
+    } else {
+        std::fs::read_to_string(linux_path(home)).is_ok_and(|s| s != linux_desktop_entry(app_exe))
+    }
+}
+
+/// Called when the app starts: installs the launcher the first time, and
+/// keeps it pointing at the current app. Returns `true` if it was installed
+/// for the first time.
+pub fn ensure(home: &Path, app_exe: &Path, already_offered: bool) -> Result<bool> {
+    let installed = location(home).is_some_and(|p| p.exists());
+    if installed {
+        if is_outdated(home, app_exe) {
+            install(home, app_exe)?;
+        }
+        Ok(false)
+    } else if !already_offered {
+        install(home, app_exe)?;
+        Ok(true)
+    } else {
+        Ok(false)
+    }
+}
+
 pub fn uninstall(home: &Path) -> Result<()> {
     match location(home) {
         Some(path) => remove_path(&path),
@@ -289,6 +320,22 @@ mod tests {
         );
         remove_path(&bundle).unwrap();
         assert!(!bundle.exists());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn outdated_detection() {
+        let tmp = tempfile::tempdir().unwrap();
+        let home = tmp.path();
+        let a = Path::new("/A/Ordo - Settings.app/Contents/MacOS/ordo-app");
+        let b = Path::new("/B/Ordo - Settings.app/Contents/MacOS/ordo-app");
+        if cfg!(target_os = "macos") {
+            macos_install(home, a).unwrap();
+        } else {
+            linux_install(home, a).unwrap();
+        }
+        assert!(!is_outdated(home, a));
+        assert!(is_outdated(home, b));
     }
 
     #[test]

@@ -142,6 +142,8 @@ pub fn run() {
             });
             app.manage(windows::SummaryTimer::default());
             watch_inbox(app.handle().clone());
+            let handle = app.handle().clone();
+            std::thread::spawn(move || commands::ensure_launcher(&handle.state::<AppState>()));
             Ok(())
         })
         .on_window_event(|window, event| {

@@ -92,6 +92,12 @@ impl Integration {
         })
     }
 
+    /// Installs the launcher on the first start and keeps it up to date
+    /// (see [`launcher::ensure`]).
+    pub fn ensure_launcher(&self, already_offered: bool) -> Result<bool> {
+        launcher::ensure(&self.home, &self.app_exe, already_offered)
+    }
+
     pub fn status(&self) -> IntegrationStatus {
         let items = if cfg!(target_os = "macos") {
             vec![macos::status(&self.home)]

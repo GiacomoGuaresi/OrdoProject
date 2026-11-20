@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: Settings = {
   checkUpdates: true,
   onboardingDone: false,
   quickSortFolders: [],
+  launcherOffered: false,
 }
 
 export interface SettingsContextValue {
