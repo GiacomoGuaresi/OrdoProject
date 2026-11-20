@@ -20,6 +20,12 @@
 - macOS: due build separate (`aarch64` e `x86_64`) invece di una universal: più semplice con la CLI
   inclusa come binario esterno (una universal richiederebbe anche una CLI universal via `lipo`).
 
+### Icone
+- Sorgente: `assets/icon.png` (logo su sfondo trasparente) → icone Windows/Linux (`pnpm tauri icon`).
+- macOS: `assets/icon-macos.png`, il logo su un riquadro scuro arrotondato secondo la griglia
+  delle icone Apple, generato con `python3 assets/make_macos_icon.py`; il `.icns` risultante è in
+  `app/src-tauri/icons/macos/` ed è usato solo da `tauri.macos.conf.json`.
+
 ### Dettagli del packaging
 - La CLI `ordo` è inclusa come *external binary* di Tauri, accanto all'eseguibile dell'app
   (`ordo-app`): `Contents/MacOS/` su macOS, cartella di installazione su Windows, `/usr/bin` nel `.deb`.
